@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <meta name="theme-color" content="#0b0f14" />
+  <link rel="manifest" href="manifest.webmanifest">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>피트니스 코치</title>
   <meta name="description" content="실내/맨몸/달리기/걷기/웨이트용 단일 HTML 앱. 템플릿 저장/보관함 고정." />
-  <meta name="theme-color" content="#0b0f14" />
-  <link rel="manifest" href="manifest.webmanifest">
   <style>
     :root{--bg:#0b0f14;--card:#121922;--ink:#e9f0f7;--muted:#92a2b3;--accent:#2bd576;--accent-2:#54a6ff;--danger:#ff6b6b;--warn:#ffb020;--br:16px;--pad:14px;--pad-lg:16px;--gap:12px;--shadow:0 10px 25px rgba(0,0,0,.25)}
     *{box-sizing:border-box}
     html,body{height:100%}
+    html{color-scheme:dark}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink)}
     header{position:sticky;top:0;background:rgba(11,15,20,.85);backdrop-filter:blur(6px);z-index:10;border-bottom:1px solid #141b24}
     .wrap{max-width:980px;margin:0 auto;padding:0 var(--pad-lg)}
@@ -38,7 +39,9 @@
     .btn.ghost{background:transparent;border-color:#2a3a4d}
     .btn:disabled{opacity:.5;cursor:not-allowed}
     label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:6px}
-    input[type=text],input[type=number],select{width:100%;background:#0d1420;border:1px solid #203046;color:#var(--ink);padding:10px;border-radius:10px}
+    input[type=text],input[type=number],select,textarea{width:100%;background:#0d1420;border:1px solid #203046;color:var(--ink);-webkit-text-fill-color:var(--ink);caret-color:var(--ink);padding:10px;border-radius:10px}
+    input::placeholder, textarea::placeholder{color:#7f91a3;opacity:1}
+    input:focus, select:focus, textarea:focus{outline:0;border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(84,166,255,.15)}
     input[type=number]{appearance:textfield}
     input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{appearance:none;margin:0}
     table{width:100%;border-collapse:collapse}
@@ -64,12 +67,12 @@
     <div class="wrap between">
       <div class="title">🏃‍♂️ 피트니스 코치 <span class="tag">HTML</span></div>
       <nav class="nav" aria-label="Sections">
+        <button id="installPWA" class="btn alt" style="display:none">📲 앱 설치</button>
         <button data-goto="workout" aria-current="page">워크아웃</button>
         <button data-goto="builder">빌더</button>
         <button data-goto="alerts">알림</button>
         <button data-goto="history">히스토리</button>
         <button data-goto="about">정보</button>
-        <button id="installPWA" class="btn alt" style="display:none">📲 앱 설치</button>
       </nav>
     </div>
   </header>
@@ -197,7 +200,7 @@
       <div class="card"><h3>정보</h3>
         <ul>
           <li>단일 HTML 파일로 오프라인에서도 동작합니다.</li>
-          <li>PWA 전환: <code>manifest.json</code> + <code>service worker</code> 추가 완료. 안드로이드에서 설치 가능합니다.</li>
+          <li>PWA 전환: <code>manifest.json</code> + <code>service worker</code> 추가 권장.</li>
           <li>iOS에서 TTS가 처음엔 무음일 수 있습니다(시작 두 번).</li>
           <li>스페이스바로 반복 수 +1 (본문 포커스).</li>
         </ul>
@@ -231,7 +234,7 @@
   function saveHistory(){ safeSet('fc_history',historyData); }
 
   // nav
-  $$('.nav button').forEach(b=>b.addEventListener('click',()=>{ const to=b.getAttribute('data-goto'); if(!to) return; $$('.nav button').forEach(x=>x.removeAttribute('aria-current')); if(to) b.setAttribute('aria-current','page'); $$('main > section').forEach(s=>s.classList.remove('active')); if(to) document.getElementById(to).classList.add('active'); }));
+  $$('.nav button').forEach(b=>b.addEventListener('click',()=>{ const to=b.getAttribute('data-goto'); $$('.nav button').forEach(x=>x.removeAttribute('aria-current')); b.setAttribute('aria-current','page'); $$('main > section').forEach(s=>s.classList.remove('active')); document.getElementById(to).classList.add('active'); }));
 
   // defaults
   const defaultTemplates={
@@ -330,37 +333,35 @@
   $('#setWarn')?.addEventListener('change',e=>{ voice.warnSec=Math.max(0,+e.target.value||3); });
   $('#setWake')?.addEventListener('change',e=>{ wake.want=e.target.value==='on'; if(wake.want) requestWake(); else { try{ wake.lock?.release(); }catch(_e){} wake.lock=null; } });
 
-  // --- PWA install flow ---
-  let deferredPrompt=null;
-  window.addEventListener('beforeinstallprompt',(e)=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    const btn=$('#installPWA');
-    if(btn){ btn.style.display='inline-block'; }
-  });
-  const installBtn=$('#installPWA');
-  if(installBtn){
-    installBtn.addEventListener('click', async ()=>{
-      if(!deferredPrompt){ alert('설치가 아직 준비되지 않았습니다. 조금 후 다시 시도하세요.'); return; }
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if(outcome==='accepted'){ toast('설치 중... 홈 화면에서 실행하세요.'); }
-      deferredPrompt=null;
-      installBtn.style.display='none';
-    });
-  }
-  window.addEventListener('appinstalled', () => toast('설치 완료! 홈 화면에서 실행하세요.'));
-
-  // SW registration
-  if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-      navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW registered'));
-    });
-  }
   // init
   renderTemplateShelf();
   refreshCustomPick();
   updateUI(); refreshSummary();
+    // --- PWA install flow ---
+  let deferredPrompt=null;
+  window.addEventListener('beforeinstallprompt',(e)=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    const btn=document.getElementById('installPWA');
+    if(btn){ btn.style.display='inline-block'; }
+  });
+  const installBtn=document.getElementById('installPWA');
+  if(installBtn){
+    installBtn.addEventListener('click', async ()=>{
+      if(!deferredPrompt){ alert('설치가 아직 준비되지 않았습니다. 잠시 후 다시 시도하세요.'); return; }
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if(outcome==='accepted'){ const t=document.getElementById('toast'); if(t){ t.textContent='설치 중...'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500);} }
+      deferredPrompt=null;
+      installBtn.style.display='none';
+    });
+  }
+  window.addEventListener('appinstalled', () => { const t=document.getElementById('toast'); if(t){ t.textContent='설치 완료! 홈 화면에서 실행하세요.'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600);} });
+
+  // SW registration
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js'); });
+  }
   </script>
 </body>
 </html>
