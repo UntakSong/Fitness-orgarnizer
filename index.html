@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>피트니스 코치 – V7 (빠른편집 모달 복구)</title>
-  <meta name="description" content="실내/맨몸/달리기/걷기/웨이트용 단일 HTML 앱. 빠른시작 → 빠른편집 모달, 멀티 사운드, 템플릿 저장, GPS, 히스토리." />
+  <title>피트니스 코치 – V5.1 (빠른편집 복원)</title>
+  <meta name="description" content="실내/맨몸/달리기/걷기/웨이트용 단일 HTML 앱. 빠른편집(모달) + 크레센도 예고 + 템플릿 + GPS + 히스토리." />
   <style>
     :root{--bg:#0b0f14;--card:#121922;--ink:#e9f0f7;--muted:#92a2b3;--accent:#2bd576;--accent-2:#54a6ff;--danger:#ff6b6b;--warn:#ffb020;--br:16px;--pad:14px;--pad-lg:16px;--gap:12px;--shadow:0 10px 25px rgba(0,0,0,.25)}
     *{box-sizing:border-box}
@@ -17,12 +17,14 @@
     .nav{display:flex;gap:8px;padding:10px 0;flex-wrap:wrap}
     .nav button{background:#0e141d;border:1px solid #1c2735;color:var(--ink);padding:10px 14px;border-radius:999px;cursor:pointer}
     .nav button[aria-current="page"]{background:var(--accent-2);border-color:transparent;color:#07121f}
-    main{padding:18px 0 36px} section{display:none} section.active{display:block}
+    main{padding:18px 0 36px}
+    section{display:none} section.active{display:block}
     .card{background:var(--card);border:1px solid #1b2633;border-radius:var(--br);box-shadow:var(--shadow);padding:var(--pad-lg)}
     .card h3{margin:0 0 8px;font-size:1.1rem}
     .grid{display:grid;gap:var(--gap)} .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
     @media (max-width:780px){.g2,.g3{grid-template-columns:1fr}}
     .pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;border:1px solid #253241;background:#0e1620;color:var(--ink);font-size:.9rem}
+    .pill small{color:var(--muted)}
     .btn{appearance:none;border:1px solid #233041;background:#0e1620;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
     .btn.primary{background:var(--accent);border-color:transparent;color:#071b10;font-weight:600}
     .btn.alt{background:#11263a;border-color:#234b73} .btn.warn{background:var(--warn);border-color:transparent;color:#2a1900}
@@ -46,20 +48,19 @@
     .hint{padding:8px 12px;border:1px dashed #2a3a4d;border-radius:10px;background:#0f1620;color:#a8b5c3}
     .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f1f12;border:1px solid #1e3a26;color:#bff3cc;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
     .toast.show{opacity:1}
-    /* modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:100}
+    /* Quick Edit Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:30}
     .modal.show{display:flex}
-    .dialog{width:min(980px,95vw);max-height:90vh;overflow:auto;background:var(--card);border:1px solid #1b2633;border-radius:16px;box-shadow:var(--shadow);padding:16px}
-    .dialog header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-    .qrows{display:grid;gap:8px}
-    .qrow{display:grid;grid-template-columns:1.2fr .7fr .6fr .6fr .6fr .6fr .6fr auto;gap:8px;align-items:end}
-    @media (max-width:980px){.qrow{grid-template-columns:1fr 1fr 1fr 1fr}}
+    .sheet{width:min(980px,95vw);max-height:90vh;overflow:auto;background:var(--card);border:1px solid #1b2633;border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .qe-table th,.qe-table td{white-space:nowrap}
+    .qe-table input[type=number]{width:90px}
+    .qe-table input[type=text]{min-width:160px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap between">
-      <div class="title">🏃‍♂️ 피트니스 코치 <span class="tag">V7</span></div>
+      <div class="title">🏃‍♂️ 피트니스 코치 <span class="tag">V5.1</span></div>
       <nav class="nav" aria-label="Sections">
         <button data-goto="workout" aria-current="page">워크아웃</button>
         <button data-goto="builder">빌더</button>
@@ -73,7 +74,7 @@
   <main class="wrap">
     <!-- WORKOUT -->
     <section id="workout" class="active grid" aria-label="Workout">
-      <div class="hint">🟢 <b>워크아웃</b> = 실행 화면. <b>빠른시작</b>을 누르면 <b>빠른편집 모달</b>이 열립니다.</div>
+      <div class="hint">🟢 빠른시작 항목을 누르면 <b>빠른편집(모달)</b>이 열립니다. 수정 후 <b>적용</b> 또는 <b>▶ 적용하고 시작</b>을 누르세요.</div>
       <div class="card">
         <h3>빠른 시작</h3>
         <div class="row">
@@ -82,11 +83,8 @@
           <button class="btn alt" data-template="runIntervals">달리기 인터벌</button>
           <button class="btn alt" data-template="walk30">걷기 30분</button>
           <button class="btn alt" data-template="weights5x5">웨이트 5×5</button>
-          <select id="customPick" class="btn" style="padding:10px 10px">
-            <option value="">내 템플릿 불러오기…</option>
-          </select>
+          <select id="customPick" class="btn" style="padding:10px 10px"><option value="">내 템플릿 불러오기…</option></select>
         </div>
-        <p class="tiny muted" style="margin-top:8px">버튼을 누르면 내용을 미리 보고 바로 편집할 수 있습니다.</p>
       </div>
 
       <div class="card" aria-live="polite">
@@ -106,7 +104,6 @@
           <button class="btn warn" id="repBtn" disabled>➕ 반복(+1)</button>
           <button class="btn danger" id="resetBtn" disabled>⟲ 리셋</button>
         </div>
-        <p class="tiny muted" style="margin-top:6px">반복형에서 템포가 0이면 수동 카운트(➕) 또는 스페이스바.</p>
       </div>
 
       <div class="card">
@@ -123,12 +120,11 @@
 
     <!-- BUILDER -->
     <section id="builder" class="grid" aria-label="Builder">
-      <div class="hint">🛠️ <b>빌더</b> = 설계 화면. 운동을 구성하고 템플릿으로 저장/관리합니다.</div>
+      <div class="hint">🛠️ 운동을 설계·저장하는 화면입니다. 저장 후 워크아웃에서 실행하세요.</div>
       <div class="card grid g2">
         <div><label for="wname">워크아웃 이름</label><input id="wname" type="text" placeholder="예) 맨몸 전신 20분" /></div>
         <div class="controls" style="align-self:end;justify-self:end"><button class="btn" id="saveTemplate">💾 템플릿 저장</button></div>
       </div>
-
       <div class="card">
         <div class="between" style="margin-bottom:8px"><h3>운동 추가</h3><span class="tiny muted">필드 작성 후 ➕</span></div>
         <div class="ex-add" id="addForm">
@@ -145,7 +141,6 @@
         </div>
         <div id="exList" class="grid" style="gap:8px;margin-top:12px"></div>
       </div>
-
       <div class="card grid g2" id="tplShelf">
         <div>
           <h3 style="margin-bottom:4px">생성된 워크아웃</h3>
@@ -165,19 +160,12 @@
       <div class="card">
         <h3>음성 & 알림</h3>
         <div class="row">
-          <div class="field"><label>음성 안내 사용</label><select id="setTTS"><option value="on">사용</option><option value="off">미사용</option></select></div>
+          <div class="field"><label>음성 안내</label><select id="setTTS"><option value="on">사용</option><option value="off">미사용</option></select></div>
           <div class="field"><label>한국어 음성</label><select id="setVoice"></select></div>
-          <div class="field"><label>카운트 멘트(반복형)</label><select id="setCountCall"><option value="on">사용</option><option value="off">미사용</option></select></div>
-          <div class="field"><label>화면 꺼짐 방지</label><select id="setWake"><option value="on">요청</option><option value="off">요청 안함</option></select></div>
+          <div class="field"><label>카운트 멘트</label><select id="setCountCall"><option value="on">사용</option><option value="off">미사용</option></select></div>
+          <div class="field"><label>세트 종료 예고(초)</label><input id="setWarn" type="number" min="0" step="1" value="3" /></div>
         </div>
-        <div class="row" id="soundRow" style="margin-top:8px">
-          <div class="field"><label>시작 사운드</label><select id="soundStart"></select> <button class="btn ghost" id="testStart" title="미리듣기">🔊</button></div>
-          <div class="field"><label>종료 사운드</label><select id="soundEnd"></select> <button class="btn ghost" id="testEnd" title="미리듣기">🔊</button></div>
-          <div class="field"><label>경고 사운드</label><select id="soundWarn"></select> <button class="btn ghost" id="testWarn" title="미리듣기">🔊</button></div>
-          <div class="field"><label>카운트 사운드</label><select id="soundCount"></select> <button class="btn ghost" id="testCount" title="미리듣기">🔊</button></div>
-          <div class="field" style="min-width:220px"><label>사운드 볼륨</label><input id="soundVol" type="range" min="0" max="1" step="0.05" value="0.8"></div>
-        </div>
-        <p class="tiny muted">모바일 정책상 첫 상호작용(▶ 시작/🔊 미리듣기) 이전엔 소리가 안 날 수 있습니다.</p>
+        <p class="tiny muted">브라우저 정책상 첫 클릭 이후에만 소리가 납니다.</p>
       </div>
     </section>
 
@@ -187,9 +175,7 @@
         <div class="between"><h3>히스토리</h3>
           <div class="controls"><button class="btn" id="exportData">📤 내보내기</button><button class="btn ghost" id="importData">📥 가져오기</button><input type="file" id="importFile" class="sr-only" accept="application/json" /></div>
         </div>
-        <table aria-describedby="history-desc"><caption id="history-desc" class="sr-only">완료된 세션 기록</caption>
-          <thead><tr><th>일시</th><th>이름</th><th>소요</th><th>요약</th></tr></thead><tbody id="histBody"></tbody>
-        </table>
+        <table><thead><tr><th>일시</th><th>이름</th><th>소요</th><th>요약</th></tr></thead><tbody id="histBody"></tbody></table>
       </div>
     </section>
 
@@ -197,31 +183,30 @@
     <section id="about" aria-label="About" class="grid g2">
       <div class="card"><h3>정보</h3>
         <ul>
-          <li>이 파일은 <b>단일 HTML</b>로, 오프라인에서도 동작합니다.</li>
-          <li>GPS/웨이크락은 <b>보안 환경(HTTPS/localhost)</b>에서만 동작합니다. file:// 에서는 비활성화됩니다.</li>
-          <li>iOS/Android는 첫 터치 후에만 TTS/사운드가 재생됩니다.</li>
-          <li>홈화면 앱 설치(PWA)는 HTTPS에서 서비스워커를 등록해야 합니다.</li>
+          <li>단일 HTML 파일, 오프라인 동작.</li>
+          <li>Android/iOS: 첫 사용자 조작 이후 오디오 활성화.</li>
         </ul>
       </div>
     </section>
   </main>
 
   <!-- Quick Edit Modal -->
-  <div id="qedit" class="modal" aria-hidden="true">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="qeditTitle">
-      <header>
-        <h3 id="qeditTitle">빠른 편집</h3>
-        <button class="btn ghost" id="qeditClose">✕ 닫기</button>
-      </header>
-      <div class="card grid g2" style="margin-bottom:8px">
-        <div><label>워크아웃 이름</label><input id="q_name" type="text" placeholder="예) 커스텀 루틴" /></div>
-        <div class="controls" style="align-self:end;justify-self:end"><button class="btn" id="q_add">➕ 운동 추가</button></div>
+  <div id="qeModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="between" style="margin-bottom:6px"><h3>빠른 편집</h3><button class="btn ghost" id="qeClose">✖</button></div>
+      <div class="grid g2" style="margin-bottom:8px">
+        <div><label>루틴 이름</label><input id="qeName" type="text" placeholder="워크아웃 이름"/></div>
+        <div class="controls" style="align-self:end;justify-self:end"><button class="btn" id="qeAdd">➕ 운동 추가</button></div>
       </div>
-      <div id="q_list" class="qrows"></div>
-      <div class="controls" style="margin-top:10px">
-        <button class="btn" id="q_to_builder">🛠 빌더로 보내기</button>
-        <button class="btn" id="q_save">💾 템플릿 저장</button>
-        <button class="btn primary" id="q_start">▶ 적용하고 시작</button>
+      <div style="overflow:auto">
+        <table class="qe-table" id="qeTable">
+          <thead><tr><th>운동명</th><th>유형</th><th>세트</th><th>반복/초</th><th>휴식(초)</th><th>템포</th><th>예고</th><th>메모</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="controls" style="justify-content:flex-end;margin-top:10px">
+        <button class="btn" id="qeApply">적용</button>
+        <button class="btn primary" id="qeApplyStart">▶ 적용하고 시작</button>
       </div>
     </div>
   </div>
@@ -234,28 +219,19 @@
   const pad2=n=>String(n).padStart(2,'0'); const fmtClock=s=>`${pad2(Math.floor(s/60))}:${pad2(Math.floor(s%60))}`;
   function toast(msg,ok=true){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.style.background= ok? '#0f1f12':'#2a1212'; t.style.borderColor= ok? '#1e3a26':'#4b1e1e'; t.style.color= ok? '#bff3cc':'#f6c1c1'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
 
-  // ===== sound engine (no libs)
-  const AC = window.AudioContext || window.webkitAudioContext; let audioCtx=null; function ctx(){ try{ return audioCtx||(audioCtx=new AC()); }catch(e){ return null; } }
-  let sound = safeGet('fc_sound',{start:'chime',end:'gong',warn:'beep',count:'beep',volume:0.8});
-  function saveSound(){ try{ localStorage.setItem('fc_sound', JSON.stringify(sound)); }catch(e){} }
-  function playSound(name){ const c=ctx(); if(!c||name==='none') return; const now=c.currentTime; const out=c.createGain(); out.gain.value=sound.volume; out.connect(c.destination);
-    function tone(type,freq,t0,dur,g=1){ const o=c.createOscillator(); const g1=c.createGain(); o.type=type; o.frequency.setValueAtTime(freq, now+t0); g1.gain.setValueAtTime(0, now+t0); g1.gain.linearRampToValueAtTime(g, now+t0+0.01); g1.gain.exponentialRampToValueAtTime(0.0001, now+t0+dur); o.connect(g1); g1.connect(out); o.start(now+t0); o.stop(now+t0+dur+0.05); }
-    if(name==='beep'){ tone('sine',740,0,0.18,0.6); }
-    else if(name==='chime'){ tone('sine',880,0,0.12,0.7); tone('sine',660,0.14,0.18,0.6); }
-    else if(name==='whistle'){ const o=c.createOscillator(); const g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(1900,now); o.frequency.exponentialRampToValueAtTime(1200,now+0.6); const lfo=c.createOscillator(); const lfoGain=c.createGain(); lfo.type='sine'; lfo.frequency.value=7; lfoGain.gain.value=30; lfo.connect(lfoGain); lfoGain.connect(o.frequency); g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(0.8*sound.volume,now+0.05); g.gain.exponentialRampToValueAtTime(0.0001,now+0.7); o.connect(g); g.connect(out); o.start(now); lfo.start(now); o.stop(now+0.75); lfo.stop(now+0.75); }
-    else if(name==='gong'){ [220,330,440,660].forEach((f,i)=>tone('sine',f*1.02,0,0.9+i*0.2,0.5/(i+1))); }
-    else if(name==='click'){ const b=c.createBuffer(1,c.sampleRate*0.05,c.sampleRate); const d=b.getChannelData(0); for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.6)); } const s=c.createBufferSource(); s.buffer=b; const g=c.createGain(); g.gain.value=0.6*sound.volume; s.connect(g); g.connect(out); s.start(now); }
-  }
+  // ===== audio (persistent, louder)
+  let AC=null, MASTER=null; function ensureAC(){ if(AC) return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; AC=new C(); MASTER=AC.createGain(); MASTER.gain.value=0.9; MASTER.connect(AC.destination); return AC; }
+  function beep(ms=180,freq=800,gain=0.35){ try{ const ac=ensureAC(); if(!ac) return; const o=ac.createOscillator(); const g=ac.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(MASTER); const now=ac.currentTime; g.gain.setValueAtTime(gain, now); g.gain.exponentialRampToValueAtTime(0.0001, now+ms/1000); o.start(now); o.stop(now+ms/1000+0.02);}catch(e){} }
+  function crescendo(kind='end'){ const Fs = kind==='start'? [900,1100,1300] : [700,900,1100]; const Gs=[0.32,0.42,0.52]; [0,1,2].forEach(i=> setTimeout(()=> beep(170, Fs[i], Gs[i]), i*1000)); }
 
-  // ===== voice / wake
-  const voice={enabled:true,countCall:true,voiceURI:null};
-  function speak(text){ if(!voice.enabled) return; try{ const u=new SpeechSynthesisUtterance(text); u.rate=1; u.pitch=1; u.lang='ko-KR'; const vs=speechSynthesis.getVoices(); if(voice.voiceURI){const v=vs.find(v=>v.voiceURI===voice.voiceURI); if(v) u.voice=v;} else {const ko=vs.find(v=>v.lang&&v.lang.startsWith('ko')); if(ko) u.voice=ko;} speechSynthesis.speak(u);}catch(e){} }
-  const wake={lock:null,want:true}; async function requestWake(){ if(!('wakeLock'in navigator)||!wake.want||!window.isSecureContext) return; try{ wake.lock=await navigator.wakeLock.request('screen'); }catch(e){} }
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&!wake.lock){requestWake();} });
+  // ===== speech
+  const voice={enabled:true,countCall:true,voiceURI:null,warnSec:3};
+  function speak(text){ if(!voice.enabled) return; try{ const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=1; u.pitch=1; const vs=speechSynthesis.getVoices(); if(voice.voiceURI){ const v=vs.find(v=>v.voiceURI===voice.voiceURI); if(v) u.voice=v; } else { const ko=vs.find(v=>v.lang&&v.lang.startsWith('ko')); if(ko) u.voice=ko; } speechSynthesis.speak(u);}catch(e){} }
+  function cue(t){ speak(t); beep(); }
 
-  // ===== model (safe localStorage)
+  // ===== model (robust storage)
   function safeGet(k,fb){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):fb; }catch(e){ return fb; } }
-  function safeSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ console.warn('localStorage 저장 실패',e); toast('저장 실패: 브라우저 저장소 권한 확인',false); return false; } }
+  function safeSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ console.warn('localStorage 저장 실패',e); toast('저장 실패: 저장소 권한 확인',false); return false; } }
   let currentWorkout=null; let templates=safeGet('fc_templates',{}); let historyData=safeGet('fc_history',[]);
   function saveTemplates(){ if(safeSet('fc_templates',templates)){ renderTemplateShelf(); refreshCustomPick(); } }
   function saveHistory(){ safeSet('fc_history',historyData); }
@@ -272,120 +248,105 @@
     weights5x5:{name:'스쿼트 5×5(90초 휴식)',exercises:[{name:'바벨 스쿼트',type:'reps',sets:5,reps:5,rest:90,tempo:4,warn:3,note:'폼 집중'}]}
   };
 
-  // ===== Quick Edit Modal (core)
-  let qEdit=null;
-  function openQuickEditFromKey(key){ const tpl=templates[key]||defaultTemplates[key]; if(!tpl) return alert('템플릿이 없습니다.'); qEdit=JSON.parse(JSON.stringify(tpl)); const n=$('#q_name'); if(n) n.value=qEdit.name||''; renderQList(); showQEdit(true); }
-  function showQEdit(show){ const m=$('#qedit'); if(!m) return; m.classList.toggle('show', !!show); m.setAttribute('aria-hidden', show?'false':'true'); }
-  document.addEventListener('click',e=>{ if(e.target && e.target.id==='qedit') showQEdit(false); });
-  $('#qeditClose')?.addEventListener('click',()=>showQEdit(false));
-
-  function renderQList(){ const box=$('#q_list'); if(!box) return; box.innerHTML=''; (qEdit?.exercises||[]).forEach((ex,idx)=>{ const row=document.createElement('div'); row.className='qrow'; row.innerHTML=`
-      <div><label>운동명</label><input type="text" data-k="name" data-i="${idx}" value="${ex.name||''}"></div>
-      <div><label>유형</label><select data-k="type" data-i="${idx}"><option value="reps"${ex.type==='reps'?' selected':''}>반복</option><option value="time"${ex.type==='time'?' selected':''}>시간</option></select></div>
-      <div><label>세트</label><input type="number" min="1" step="1" data-k="sets" data-i="${idx}" value="${ex.sets||1}"></div>
-      <div class="q-reps"${ex.type==='reps'?'':' style="display:none"'}><label>반복</label><input type="number" min="1" step="1" data-k="reps" data-i="${idx}" value="${ex.reps||10}"></div>
-      <div class="q-secs"${ex.type==='time'?'':' style="display:none"'}><label>시간(초)</label><input type="number" min="1" step="1" data-k="secs" data-i="${idx}" value="${ex.secs||30}"></div>
-      <div><label>휴식(초)</label><input type="number" min="0" step="5" data-k="rest" data-i="${idx}" value="${ex.rest||0}"></div>
-      <div><label>템포</label><input type="number" min="0" step="0.5" data-k="tempo" data-i="${idx}" value="${ex.tempo||0}"></div>
-      <div><label>예고(초)</label><input type="number" min="0" step="1" data-k="warn" data-i="${idx}" value="${ex.warn||3}"></div>
-      <div class="controls" style="grid-column:1/-1;justify-content:flex-end"><button class="btn ghost" data-up="${idx}">⬆</button><button class="btn ghost" data-down="${idx}">⬇</button><button class="btn danger" data-del="${idx}">삭제</button></div>
-    `; box.appendChild(row); }); }
-  $('#q_list')?.addEventListener('input',e=>{ const t=e.target; const i=+t.dataset.i; const k=t.dataset.k; if(qEdit&&qEdit.exercises[i]){ const v=(t.type==='number')? +t.value : t.value; qEdit.exercises[i][k]=v; if(k==='type'){ renderQList(); } } });
-  $('#q_list')?.addEventListener('click',e=>{ const t=e.target; if(t.dataset?.up){ const i=+t.dataset.up; if(i>0){ [qEdit.exercises[i-1],qEdit.exercises[i]]=[qEdit.exercises[i],qEdit.exercises[i-1]]; renderQList(); } }
-    if(t.dataset?.down){ const i=+t.dataset.down; if(i<qEdit.exercises.length-1){ [qEdit.exercises[i+1],qEdit.exercises[i]]=[qEdit.exercises[i],qEdit.exercises[i+1]]; renderQList(); } }
-    if(t.dataset?.del){ qEdit.exercises.splice(+t.dataset.del,1); renderQList(); }
+  // ===== Quick Start -> Quick Edit modal =====
+  let qeData=null; const qeModal=$('#qeModal'); const qeTBody=$('#qeTable tbody');
+  function openQuickEdit(src){ const tpl = typeof src==='string'? (templates[src]||defaultTemplates[src]) : src; if(!tpl){ alert('템플릿이 없습니다.'); return; }
+    qeData=JSON.parse(JSON.stringify(tpl)); $('#qeName').value=qeData.name||''; renderQE(); showQE(true); }
+  function showQE(on){ qeModal.classList.toggle('show',!!on); qeModal.setAttribute('aria-hidden', on? 'false':'true'); document.body.style.overflow= on? 'hidden':''; }
+  function renderQE(){ if(!qeData) return; qeTBody.innerHTML=''; (qeData.exercises||[]).forEach((ex,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`
+      <td><input type="text" data-k="name" value="${ex.name||''}"/></td>
+      <td><select data-k="type"><option value="reps" ${ex.type==='reps'?'selected':''}>반복</option><option value="time" ${ex.type==='time'?'selected':''}>시간</option></select></td>
+      <td><input type="number" min="1" step="1" data-k="sets" value="${ex.sets||1}"/></td>
+      <td><input type="number" min="1" step="1" data-k="qty" value="${ex.type==='time'?(ex.secs||30):(ex.reps||10)}"/></td>
+      <td><input type="number" min="0" step="1" data-k="rest" value="${ex.rest||0}"/></td>
+      <td><input type="number" min="0" step="0.5" data-k="tempo" value="${ex.tempo||0}"/></td>
+      <td><input type="number" min="0" step="1" data-k="warn" value="${ex.warn||3}"/></td>
+      <td><input type="text" data-k="note" value="${ex.note||''}"/></td>
+      <td><button class="btn danger" data-del="${i}">삭제</button></td>`; qeTBody.appendChild(tr); }); }
+  qeTBody.addEventListener('input', (e)=>{ if(!qeData) return; const el=e.target; if(!(el instanceof HTMLElement)) return; const td=el.closest('td'); const tr=el.closest('tr'); if(!tr) return; const idx=[...qeTBody.children].indexOf(tr); const k=el.getAttribute('data-k'); if(idx<0||!k) return; const ex=qeData.exercises[idx]; if(k==='qty'){ if(ex.type==='time'){ ex.secs=Math.max(1, +el.value||1); } else { ex.reps=Math.max(1, +el.value||1); } }
+    else if(k==='type'){ const v=el.value; ex.type=v; if(v==='time'){ ex.secs=ex.secs||30; } else { ex.reps=ex.reps||10; } renderQE(); }
+    else { ex[k] = (el.type==='number')? +el.value : el.value; }
   });
-  $('#q_add')?.addEventListener('click',()=>{ if(!qEdit) qEdit={name:'사용자 워크아웃',exercises:[]}; qEdit.exercises.push({name:'새 운동',type:'reps',sets:3,reps:10,secs:30,rest:30,tempo:2,warn:3,note:''}); renderQList(); });
-  $('#q_start')?.addEventListener('click',()=>{ if(!qEdit) return; qEdit.name=$('#q_name').value.trim()||(qEdit.name||'사용자 워크아웃'); currentWorkout=JSON.parse(JSON.stringify(qEdit)); refreshSummary(); showQEdit(false); $$('[data-goto="workout"]').forEach(b=>b.click()); speak(`운동을 시작합니다. ${currentWorkout.name}`); playSound(sound.start); startSession(); });
-  $('#q_save')?.addEventListener('click',()=>{ if(!qEdit) return; const key=prompt('저장 키(영문/숫자): 예) myQuickA'); if(!key) return; const exists=!!templates[key]; if(exists && !confirm('같은 키가 있습니다. 덮어쓸까요?')) return; const toSave={name:$('#q_name').value.trim()||(qEdit.name||key),exercises:JSON.parse(JSON.stringify(qEdit.exercises))}; templates[key]=toSave; saveTemplates(); toast('템플릿 저장 완료: '+key); });
-  $('#q_to_builder')?.addEventListener('click',()=>{ if(!qEdit) return; exList.length=0; qEdit.exercises.forEach(ex=>exList.push(JSON.parse(JSON.stringify(ex)))); $('#wname').value=$('#q_name').value.trim()||(qEdit.name||'사용자 워크아웃'); renderExList(); refreshSummary(); showQEdit(false); $$('[data-goto="builder"]').forEach(b=>b.click()); });
+  qeTBody.addEventListener('click',(e)=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.del){ qeData.exercises.splice(+t.dataset.del,1); renderQE(); }});
+  $('#qeAdd').addEventListener('click',()=>{ if(!qeData) return; qeData.exercises.push({name:'새 운동',type:'reps',sets:3,reps:10,rest:30,tempo:2,warn:3,note:''}); renderQE(); });
+  $('#qeClose').addEventListener('click',()=> showQE(false));
+  qeModal.addEventListener('click',(e)=>{ if(e.target===qeModal) showQE(false); });
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && qeModal.classList.contains('show')) showQE(false); });
+  function applyQE(startNow=false){ if(!qeData) return; const name=$('#qeName').value.trim() || qeData.name || '사용자 워크아웃'; const exs=qeData.exercises.filter(x=>x&&x.name&&x.sets>0).map(x=>({ name:x.name.trim(), type:x.type==='time'?'time':'reps', sets:Math.max(1, +x.sets||1), reps:x.type==='reps'? Math.max(1, +x.reps||+x.qty||10):undefined, secs:x.type==='time'? Math.max(1, +x.secs||+x.qty||30):undefined, rest:Math.max(0, +x.rest||0), tempo:Math.max(0, +x.tempo||0), warn:Math.max(0, +x.warn||0), note:(x.note||'').trim() })); if(exs.length===0){ alert('운동 항목이 없습니다.'); return; }
+    currentWorkout={name,exercises:exs}; refreshSummary(); showQE(false); toast('워크아웃 적용 완료'); cue('워크아웃이 준비되었습니다.'); if(startNow){ $$('[data-goto="workout"]').forEach(b=>b.click()); try{ ensureAC(); speak(`운동을 시작합니다. ${name}`); }catch(_){ } startSession(); } }
+  $('#qeApply').addEventListener('click',()=>applyQE(false));
+  $('#qeApplyStart').addEventListener('click',()=>applyQE(true));
 
-  // ===== Quick Start wired to Quick Edit
-  $$('#workout [data-template]').forEach(b=>b.addEventListener('click',()=>openQuickEditFromKey(b.dataset.template)));
-  function refreshCustomPick(){ const sel=$('#customPick'); if(!sel) return; const cur=sel.value; sel.innerHTML='<option value="">내 템플릿 불러오기…</option>'; Object.keys(templates).sort().forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=(templates[k].name||k)+' ('+k+')'; sel.appendChild(o); }); sel.value=cur||''; }
-  $('#customPick').addEventListener('change',e=>{ const k=e.target.value; if(!k) return; openQuickEditFromKey(k); e.target.value=''; });
+  // wire Quick Start buttons to Quick Edit (restored behavior)
+  $$('#workout [data-template]').forEach(b=>b.addEventListener('click',()=> openQuickEdit(b.dataset.template)));
+  function refreshCustomPick(){ const sel=$('#customPick'); const cur=sel.value; sel.innerHTML='<option value="">내 템플릿 불러오기…</option>'; Object.keys(templates).sort().forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=(templates[k].name||k)+' ('+k+')'; sel.appendChild(o); }); sel.value=cur||''; }
+  $('#customPick').addEventListener('change',e=>{ const k=e.target.value; if(!k) return; openQuickEdit(k); e.target.value=''; });
 
   // ===== builder
   const exType=$('#exType'); const repsWrap=$('#repsWrap'); const timeWrap=$('#timeWrap');
-  exType.addEventListener('change',()=>{ const isTime=exType.value==='time'; repsWrap.style.display=isTime?'none':''; timeWrap.style.display=isTime?'':''; });
-  const exList=[];
-  function renderExList(){ const box=$('#exList'); box.innerHTML=''; exList.forEach((ex,idx)=>{ const row=document.createElement('div'); row.className='card ex-row'; row.innerHTML=`<div class="between"><div><b>${ex.name}</b> <span class="tag">${ex.type==='time'?`${ex.secs}s×${ex.sets}`:`${ex.reps}회×${ex.sets}`}</span> ${ex.note?`<span class=tiny>${ex.note}</span>`:''}</div><div class=controls><button class="btn ghost" data-up=${idx}>⬆</button><button class="btn ghost" data-down=${idx}>
-      ⬇</button><button class="btn danger" data-del=${idx}>삭제</button></div></div><div class=row><div class=pill><small>세트</small> <b>${ex.sets}</b></div>${ex.type==='time'?`<div class=pill><small>시간</small> <b>${ex.secs}s</b></div>`:`<div class=pill><small>반복</small> <b>${ex.reps}회</b></div>`}<div class=pill><small>휴식</small> <b>${ex.rest}s</b></div><div class=pill><small>템포</small> <b>${ex.tempo}s/회</b></div><div class=pill><small>예고</small> <b>${ex.warn}s</b></div></div>`; box.appendChild(row); }); }
-  $('#exList').addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.del){ exList.splice(+t.dataset.del,1); renderExList(); refreshSummary(); } if(t.dataset.up){ const i=+t.dataset.up; if(i>0){ [exList[i-1],exList[i]]=[exList[i],exList[i-1]]; renderExList(); } } if(t.dataset.down){ const i=+t.dataset.down; if(i<exList.length-1){ [exList[i+1],exList[i]]=[exList[i],exList[i+1]]; renderExList(); } } });
-  $('#addExercise').addEventListener('click',()=>{ const name=$('#exName').value.trim(); if(!name) return alert('운동명을 입력하세요.'); const type=$('#exType').value; const sets=Math.max(1,+$('#exSets').value||1); const reps=Math.max(1,+$('#exReps').value||10); const secs=Math.max(1,+$('#exSecs').value||30); const rest=Math.max(0,+$('#exRest').value||30); const tempo=Math.max(0,+$('#exTempo').value||0); const warn=Math.max(0,+$('#exWarn').value||3); const note=$('#exNote').value.trim(); const item={name,type,sets,reps,secs,rest,tempo,warn,note}; exList.push(item); renderExList(); refreshSummary(); $('#exName').value=''; $('#exNote').value=''; });
+  exType?.addEventListener('change',()=>{ const isTime=exType.value==='time'; repsWrap.style.display=isTime?'none':''; timeWrap.style.display=isTime?'':''; });
+  const exList=[]; function renderExList(){ const box=$('#exList'); box.innerHTML=''; exList.forEach((ex,idx)=>{ const row=document.createElement('div'); row.className='card ex-row'; row.innerHTML=`<div class="between"><div><b>${ex.name}</b> <span class="tag">${ex.type==='time'?`${ex.secs}s×${ex.sets}`:`${ex.reps}회×${ex.sets}`}</span> ${ex.note?`<span class=tiny>${ex.note}</span>`:''}</div><div class=controls><button class="btn ghost" data-up=${idx}>⬆</button><button class="btn ghost" data-down=${idx}>⬇</button><button class="btn danger" data-del=${idx}>삭제</button></div></div><div class=row><div class=pill><small>세트</small> <b>${ex.sets}</b></div>${ex.type==='time'?`<div class=pill><small>시간</small> <b>${ex.secs}s</b></div>`:`<div class=pill><small>반복</small> <b>${ex.reps}회</b></div>`}<div class=pill><small>휴식</small> <b>${ex.rest}s</b></div><div class=pill><small>템포</small> <b>${ex.tempo}s/회</b></div><div class=pill><small>예고</small> <b>${ex.warn}s</b></div></div>`; box.appendChild(row); }); }
+  $('#exList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.del){ exList.splice(+t.dataset.del,1); renderExList(); refreshSummary(); } if(t.dataset.up){ const i=+t.dataset.up; if(i>0){ [exList[i-1],exList[i]]=[exList[i],exList[i-1]]; renderExList(); } } if(t.dataset.down){ const i=+t.dataset.down; if(i<exList.length-1){ [exList[i+1],exList[i]]=[exList[i],exList[i+1]]; renderExList(); } } });
+  $('#addExercise')?.addEventListener('click',()=>{ const name=$('#exName').value.trim(); if(!name) return alert('운동명을 입력하세요.'); const type=$('#exType').value; const sets=Math.max(1,+$('#exSets').value||1); const reps=Math.max(1,+$('#exReps').value||10); const secs=Math.max(1,+$('#exSecs').value||30); const rest=Math.max(0,+$('#exRest').value||30); const tempo=Math.max(0,+$('#exTempo').value||0); const warn=Math.max(0,+$('#exWarn').value||3); const note=$('#exNote').value.trim(); exList.push({name,type,sets,reps,secs,rest,tempo,warn,note}); renderExList(); refreshSummary(); $('#exName').value=''; $('#exNote').value=''; });
   function refreshSummary(){ const w=currentWorkout||{name:$('#wname').value.trim()||'(이름 없음)',exercises:exList}; const sum=w.exercises.map(ex=>ex.type==='time'?`${ex.name} ${ex.secs}s×${ex.sets}`:`${ex.name} ${ex.reps}회×${ex.sets}`).join(' · '); $('#summary').textContent=sum||'-'; }
-
-  // template shelf
-  function renderTemplateShelf(){ const box=$('#tplList'); if(!box) return; box.innerHTML=''; const keys=Object.keys(templates); if(keys.length===0){ box.innerHTML='<div class="tiny muted">저장된 템플릿이 없습니다.</div>'; return; } keys.sort().forEach(k=>{ const t=templates[k]; const el=document.createElement('div'); el.className='between card'; el.style.padding='10px'; el.innerHTML=`<div><b>${t.name||k}</b> <span class="tag">${k}</span><div class="tiny muted">${(t.exercises||[]).length}개 운동</div></div><div class=controls><button class="btn" data-load="${k}">불러오기</button><button class="btn ghost" data-rename="${k}">이름변경</button><button class="btn danger" data-del="${k}">삭제</button></div>`; box.appendChild(el); }); }
-  $('#tplList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.load){ openQuickEditFromKey(t.dataset.load); }
+  function renderTemplateShelf(){ const box=$('#tplList'); box.innerHTML=''; const keys=Object.keys(templates); if(keys.length===0){ box.innerHTML='<div class="tiny muted">저장된 템플릿이 없습니다.</div>'; return; } keys.sort().forEach(k=>{ const t=templates[k]; const el=document.createElement('div'); el.className='between card'; el.style.padding='10px'; el.innerHTML=`<div><b>${t.name||k}</b> <span class="tag">${k}</span><div class="tiny muted">${(t.exercises||[]).length}개 운동</div></div><div class=controls><button class="btn" data-load="${k}">불러오기</button><button class="btn ghost" data-rename="${k}">이름변경</button><button class="btn danger" data-del="${k}">삭제</button></div>`; box.appendChild(el); }); }
+  $('#tplList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.load){ // 보관함은 기존 동작 유지: 바로 로드
+      const key=t.dataset.load; const tpl=templates[key]; if(!tpl) return; currentWorkout=JSON.parse(JSON.stringify(tpl)); refreshSummary(); $$('[data-goto="workout"]').forEach(b=>b.click()); toast('불러왔습니다'); }
     if(t.dataset.del){ if(confirm('삭제할까요? '+t.dataset.del)){ delete templates[t.dataset.del]; saveTemplates(); toast('삭제했습니다.'); } }
     if(t.dataset.rename){ const k=t.dataset.rename; const nw=prompt('새 이름:', templates[k].name||k); if(nw){ templates[k].name=nw; saveTemplates(); toast('이름 변경 완료'); } }
   });
-  $('#saveTemplate').addEventListener('click',()=>{ const hasItems = exList.length>0 || (currentWorkout && (currentWorkout.exercises||[]).length>0); if(!hasItems) return alert('저장할 운동이 없습니다. 빌더에 운동을 추가하세요.'); const key = prompt('저장 키(영문/숫자): 예) myBodyA'); if(!key) return; const exists = !!templates[key]; if(exists && !confirm('같은 키가 있습니다. 덮어쓸까요?')) return; const name=$('#wname').value.trim()||key; const exs = exList.length? exList : currentWorkout.exercises; templates[key] = { name, exercises: JSON.parse(JSON.stringify(exs)) }; saveTemplates(); toast('템플릿 저장 완료: '+key); });
+  $('#saveTemplate')?.addEventListener('click',()=>{ const has=exList.length>0 || (currentWorkout && (currentWorkout.exercises||[]).length>0); if(!has) return alert('저장할 운동이 없습니다.'); const key=prompt('저장 키(영문/숫자): 예) myBodyA'); if(!key) return; const exists=!!templates[key]; if(exists && !confirm('덮어쓸까요?')) return; const name=$('#wname').value.trim()||key; const exs=exList.length?exList:currentWorkout.exercises; templates[key]={name,exercises:JSON.parse(JSON.stringify(exs))}; saveTemplates(); toast('템플릿 저장 완료: '+key); });
+  $('#loadToRun')?.addEventListener('click',()=>{ const name=$('#wname').value.trim()||'사용자 워크아웃'; if(!exList.length) return alert('리스트가 비어 있습니다.'); currentWorkout={name,exercises:JSON.parse(JSON.stringify(exList))}; $$('[data-goto="workout"]').forEach(b=>b.click()); speak('워크아웃이 준비되었습니다. 시작을 누르세요.'); });
+  $('#clearAll')?.addEventListener('click',()=>{ if(confirm('모두 지우기?')){ exList.length=0; renderExList(); refreshSummary(); }});
 
-  // ===== runner
+  // ===== runner (with 3s crescendo)
   const statusEl=$('#status'); const bar=$('#bar'); const nowEx=$('#now-ex'); const nowSet=$('#now-set'); const nowDetail=$('#now-detail'); const remEl=$('#remaining'); const repBtn=$('#repBtn');
-  const runner={i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,timer:null,tempo:0};
+  const runner={i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,timer:null,tempo:0, startSeqFired:false, endSeqFired:false};
   function updateUI(){ if(!currentWorkout){ nowEx.textContent='-'; nowSet.textContent='-'; nowDetail.textContent='-'; remEl.textContent='00:00'; if(bar) bar.style.width='0%'; return; } const ex=currentWorkout.exercises[runner.i]; if(!ex){ nowEx.textContent='완료'; nowSet.textContent='-'; nowDetail.textContent='-'; return; } nowEx.textContent=`${ex.name} ${runner.phase==='rest'?'(휴식)':''}`; nowSet.textContent=`${runner.set} / ${ex.sets}`; nowDetail.textContent=ex.type==='time'?`${ex.secs}s`:`${runner.rep}/${ex.reps}회`; }
-  function startSession(){ if(!currentWorkout){ alert('템플릿을 선택하거나 빌더에서 생성하세요.'); return; } requestWake(); document.body.focus(); if(ctx() && ctx().state==='suspended'){ ctx().resume?.(); } Object.assign(runner,{i:0,set:1,phase:'work',rep:0,repsTarget:0,warnDone:false,paused:false,tempo:0}); statusEl.textContent='진행 중'; $('#startBtn').disabled=true; $('#pauseBtn').disabled=false; $('#skipBtn').disabled=false; $('#resetBtn').disabled=false; repBtn.disabled=false; speak(`운동을 시작합니다. ${currentWorkout.name}`); stepWork(); }
-  function stepWork(){ const ex=currentWorkout.exercises[runner.i]; if(!ex) return finishSession(); runner.phase='work'; runner.warnDone=false; if(bar) bar.style.width='0%'; if(ex.type==='time'){ runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.secs*1000; $('#countdown-label').textContent='남은 시간'; speak(`${ex.name} ${runner.set}세트 시작`); tick(); } else { runner.rep=0; runner.repsTarget=ex.reps; runner.tempo=ex.tempo||0; $('#countdown-label').textContent='반복'; speak(`${ex.name} ${runner.set}세트 시작`); if(voice.countCall&&runner.tempo>0){ scheduleNextRep(); } else { updateUI(); } } }
-  function scheduleNextRep(){ const ex=currentWorkout.exercises[runner.i]; if(!ex||runner.phase!=='work') return; if(runner.rep>=runner.repsTarget){ return afterWork(); } runner.timer&&clearTimeout(runner.timer); runner.timer=setTimeout(()=>{ runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else playSound(sound.count); if(runner.rep===runner.repsTarget-1){ if(voice.enabled) speak('마지막 한 개'); else playSound(sound.count); } if(runner.rep>=runner.repsTarget){ if(ex.warn>0) {speak('곧 종료합니다'); playSound(sound.warn);} setTimeout(afterWork,350); } else { scheduleNextRep(); } }, Math.max(10,runner.tempo*1000)); }
-  function tick(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.secs*1000; const prog=Math.max(0,Math.min(1,1 - remain/total)); if(bar) bar.style.width=`${prog*100}%`; updateUI(); if(!runner.warnDone&&ex.warn>0&&remain/1000<=ex.warn){ runner.warnDone=true; speak('곧 종료합니다'); playSound(sound.warn); } if(remain<=0){ setTimeout(afterWork,60); return;} runner.timer=requestAnimationFrame(tick); }
-  function afterWork(){ const ex=currentWorkout.exercises[runner.i]; if(ex.rest>0){ runner.phase='rest'; runner.warnDone=false; speak('휴식 시작'); runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.rest*1000; $('#countdown-label').textContent='휴식 남은 시간'; tickRest(); } else { nextSetOrExercise(); } }
-  function tickRest(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.rest*1000; const prog=Math.max(0,Math.min(1,1 - remain/total)); if(bar) bar.style.width=`${prog*100}%`; updateUI(); if(!runner.warnDone&&ex.warn>0&&remain/1000<=ex.warn){ runner.warnDone=true; speak('곧 다음 세트입니다'); playSound(sound.warn); } if(remain<=0){ nextSetOrExercise(); return;} runner.timer=requestAnimationFrame(tickRest); }
+  function startSession(){ if(!currentWorkout){ alert('템플릿을 선택하거나 빌더에서 생성하세요.'); return; } ensureAC(); document.body.focus(); Object.assign(runner,{i:0,set:1,phase:'work',rep:0,repsTarget:0,warnDone:false,paused:false,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='진행 중'; $('#startBtn').disabled=true; $('#pauseBtn').disabled=false; $('#skipBtn').disabled=false; $('#resetBtn').disabled=false; repBtn.disabled=false; speak(`운동을 시작합니다. ${currentWorkout.name}`); stepWork(); }
+  function stepWork(){ const ex=currentWorkout.exercises[runner.i]; if(!ex) return finishSession(); runner.phase='work'; runner.warnDone=false; runner.endSeqFired=false; if(bar) bar.style.width='0%'; if(ex.type==='time'){ runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.secs*1000; $('#countdown-label').textContent='남은 시간'; speak(`${ex.name} ${runner.set}세트 시작`); tick(); } else { runner.rep=0; runner.repsTarget=ex.reps; runner.tempo=ex.tempo||0; $('#countdown-label').textContent='반복'; speak(`${ex.name} ${runner.set}세트 시작`); if(voice.countCall&&runner.tempo>0){ scheduleNextRep(); } else { updateUI(); } } }
+  function scheduleNextRep(){ const ex=currentWorkout.exercises[runner.i]; if(!ex||runner.phase!=='work') return; if(runner.rep>=runner.repsTarget){ return afterWork(); } runner.timer&&clearTimeout(runner.timer); runner.timer=setTimeout(()=>{ runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep===runner.repsTarget-1){ speak('마지막 한 개'); beep(200,600,0.5); } if(runner.rep>=runner.repsTarget){ setTimeout(afterWork,300); } else { scheduleNextRep(); } }, Math.max(10,runner.tempo*1000)); }
+  function tick(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.secs*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.endSeqFired && remain/1000<=3){ runner.endSeqFired=true; speak('곧 종료합니다'); crescendo('end'); }
+    if(remain<=0){ afterWork(); return;} runner.timer=requestAnimationFrame(tick); }
+  function afterWork(){ const ex=currentWorkout.exercises[runner.i]; if(ex.rest>0){ runner.phase='rest'; runner.warnDone=false; runner.startSeqFired=false; speak('휴식 시작'); runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.rest*1000; $('#countdown-label').textContent='휴식 남은 시간'; tickRest(); } else { nextSetOrExercise(); } }
+  function tickRest(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.rest*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.startSeqFired && remain/1000<=3){ runner.startSeqFired=true; speak('준비'); crescendo('start'); }
+    if(remain<=0){ nextSetOrExercise(); return;} runner.timer=requestAnimationFrame(tickRest); }
   function nextSetOrExercise(){ const ex=currentWorkout.exercises[runner.i]; if(runner.set<ex.sets){ runner.set++; stepWork(); } else { runner.i++; runner.set=1; if(runner.i>=currentWorkout.exercises.length) finishSession(); else stepWork(); } }
   function pauseSession(){ if(runner.paused) return resumeSession(); runner.paused=true; statusEl.textContent='일시정지'; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} }
   function resumeSession(){ runner.paused=false; statusEl.textContent='진행 중'; const ex=currentWorkout.exercises[runner.i]; if(!ex) return; if(runner.phase==='work'){ if(ex.type==='time') tick(); else scheduleNextRep(); } else if(runner.phase==='rest') tickRest(); }
   function skip(){ if(!currentWorkout) return; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} speak('스킵합니다'); nextSetOrExercise(); }
-  function resetSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} Object.assign(runner,{i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,tempo:0}); statusEl.textContent='대기'; $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; $('#resetBtn').disabled=true; repBtn.disabled=true; updateUI(); if(bar) bar.style.width='0%'; remEl.textContent='00:00'; }
-  function finishSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} statusEl.textContent='완료'; speak('수고하셨습니다. 워크아웃이 완료되었습니다.'); playSound(sound.end); $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; repBtn.disabled=true; const end=new Date(); historyData.unshift({ts:end.toISOString(),name:currentWorkout?.name||'-',summary:$('#summary').textContent,duration:calcDurationEstimate(currentWorkout)}); historyData=historyData.slice(0,200); saveHistory(); renderHistory(); }
+  function resetSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} Object.assign(runner,{i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='대기'; $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; $('#resetBtn').disabled=true; repBtn.disabled=true; updateUI(); if(bar) bar.style.width='0%'; remEl.textContent='00:00'; }
+  function finishSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} statusEl.textContent='완료'; speak('수고하셨습니다. 워크아웃이 완료되었습니다.'); $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; repBtn.disabled=true; const end=new Date(); historyData.unshift({ts:end.toISOString(),name:currentWorkout?.name||'-',summary:$('#summary').textContent,duration:calcDurationEstimate(currentWorkout)}); historyData=historyData.slice(0,200); saveHistory(); renderHistory(); }
   function calcDurationEstimate(w){ if(!w) return '—'; let s=0; w.exercises.forEach(ex=>{ if(ex.type==='time') s+=(ex.secs+(ex.rest||0))*ex.sets; else s+= (ex.tempo>0?ex.reps*ex.tempo:2*ex.reps)*ex.sets + (ex.rest||0)*ex.sets; }); return fmtClock(s); }
 
+  // buttons
   $('#startBtn').addEventListener('click',startSession); $('#pauseBtn').addEventListener('click',pauseSession); $('#skipBtn').addEventListener('click',skip); $('#resetBtn').addEventListener('click',resetSession);
   document.addEventListener('keydown',e=>{ if(e.code==='Space'&&!repBtn.disabled){ e.preventDefault(); repBtn.click(); } });
-  $('#repBtn').addEventListener('click',()=>{ const ex=currentWorkout?.exercises[runner.i]; if(!ex||ex.type!=='reps') return; if(runner.phase!=='work') return; runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else playSound(sound.count); if(runner.rep>=ex.reps){ speak('곧 종료합니다'); playSound(sound.warn); setTimeout(afterWork,300); } });
+  $('#repBtn').addEventListener('click',()=>{ const ex=currentWorkout?.exercises[runner.i]; if(!ex||ex.type!=='reps') return; if(runner.phase!=='work') return; runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep>=ex.reps){ speak('곧 종료합니다'); beep(200,900,0.5); setTimeout(afterWork,300); } });
 
-  // ===== GPS
+  // GPS
   const gps={id:null,pts:[],dist:0}; function hav(a,b){ const toR=d=>d*Math.PI/180; const R=6371000; const dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon); const lat1=toR(a.lat), lat2=toR(b.lat); const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(Math.abs(dLon)/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
   function gpsUpdate(pos){ const p={lat:pos.coords.latitude,lon:pos.coords.longitude,t:Date.now()}; const n=gps.pts.length; if(n>0){ gps.dist+=hav(gps.pts[n-1],p);} gps.pts.push(p); $('#gpsPts').textContent=String(gps.pts.length); $('#gpsDist').textContent=(gps.dist/1000).toFixed(2)+' km'; }
   $('#gpsStart').addEventListener('click',()=>{ if(!navigator.geolocation) return alert('이 기기는 위치 서비스를 지원하지 않습니다.'); if(gps.id) return; gps.pts=[]; gps.dist=0; $('#gpsPts').textContent='0'; $('#gpsDist').textContent='0.00 km'; gps.id=navigator.geolocation.watchPosition(gpsUpdate,console.warn,{enableHighAccuracy:true,maximumAge:2000,timeout:10000}); $('#gpsStart').disabled=true; $('#gpsStop').disabled=false; });
   $('#gpsStop').addEventListener('click',()=>{ if(gps.id){ navigator.geolocation.clearWatch(gps.id); gps.id=null; } $('#gpsStart').disabled=false; $('#gpsStop').disabled=true; alert('기록된 좌표 수: '+gps.pts.length+'\n총 거리: '+(gps.dist/1000).toFixed(2)+' km'); });
 
-  // ===== history
+  // history
   function renderHistory(){ const tbody=$('#histBody'); tbody.innerHTML=''; historyData.forEach(it=>{ const tr=document.createElement('tr'); const dt=new Date(it.ts); tr.innerHTML=`<td>${dt.toLocaleString()}</td><td>${it.name}</td><td>${it.duration}</td><td class=muted>${it.summary||''}</td>`; tbody.appendChild(tr); }); }
   renderHistory();
   $('#exportData').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({templates,historyData},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fitness-coach-data.json'; a.click(); URL.revokeObjectURL(a.href); });
   $('#importData').addEventListener('click',()=> $('#importFile').click());
   $('#importFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const fr=new FileReader(); fr.onload=()=>{ try{ const obj=JSON.parse(fr.result); if(obj.templates) templates=obj.templates; if(obj.historyData) historyData=obj.historyData; saveTemplates(); saveHistory(); renderHistory(); toast('데이터 불러왔습니다.'); }catch(err){ alert('JSON 파싱 실패'); } }; fr.readAsText(f); });
 
-  // ===== alerts tab bindings
+  // alerts tab wiring
   function populateVoices(){ const sel=$('#setVoice'); if(!sel) return; sel.innerHTML=''; const vs=speechSynthesis.getVoices(); const opts=vs.filter(v=>v.lang&&v.lang.startsWith('ko')); if(opts.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='(기본)'; sel.appendChild(o); return; } opts.forEach(v=>{ const o=document.createElement('option'); o.value=v.voiceURI; o.textContent=v.name+' · '+v.lang; sel.appendChild(o); }); if(voice.voiceURI){ sel.value=voice.voiceURI; } }
   speechSynthesis.onvoiceschanged=populateVoices; populateVoices();
   $('#setTTS')?.addEventListener('change',e=>{ voice.enabled=e.target.value==='on'; });
   $('#setVoice')?.addEventListener('change',e=>{ voice.voiceURI=e.target.value||null; });
   $('#setCountCall')?.addEventListener('change',e=>{ voice.countCall=e.target.value==='on'; });
-  $('#setWake')?.addEventListener('change',e=>{ wake.want=e.target.value==='on'; if(wake.want) requestWake(); else { try{ wake.lock?.release(); }catch(_e){} wake.lock=null; } });
+  $('#setWarn')?.addEventListener('change',e=>{ voice.warnSec=Math.max(0,+e.target.value||3); });
 
-  // ===== sound selectors
-  function bindSoundUI(){ const opts=['none','beep','chime','whistle','gong','click']; function setOptions(sel){ sel.innerHTML=opts.map(v=>`<option value="${v}">${({none:'없음',beep:'삐',chime:'차임',whistle:'호루라기',gong:'징',click:'클릭'})[v]}</option>`).join(''); }
-    const sStart=$('#soundStart'), sEnd=$('#soundEnd'), sWarn=$('#soundWarn'), sCount=$('#soundCount'), sVol=$('#soundVol');
-    if(sStart){ setOptions(sStart); setOptions(sEnd); setOptions(sWarn); setOptions(sCount); sStart.value=sound.start; sEnd.value=sound.end; sWarn.value=sound.warn; sCount.value=sound.count; if(sVol) sVol.value=sound.volume;
-      sStart.onchange=e=>{sound.start=e.target.value; saveSound();};
-      sEnd.onchange=e=>{sound.end=e.target.value; saveSound();};
-      sWarn.onchange=e=>{sound.warn=e.target.value; saveSound();};
-      sCount.onchange=e=>{sound.count=e.target.value; saveSound();};
-      if(sVol) sVol.oninput=e=>{ sound.volume=+e.target.value; saveSound(); };
-    }
-    $('#testStart')?.addEventListener('click',()=>playSound(sound.start));
-    $('#testEnd')?.addEventListener('click',()=>playSound(sound.end));
-    $('#testWarn')?.addEventListener('click',()=>playSound(sound.warn));
-    $('#testCount')?.addEventListener('click',()=>playSound(sound.count));
-  }
-  bindSoundUI();
-
-  // ===== init
-  function initialRender(){ renderTemplateShelf(); refreshCustomPick(); updateUI(); refreshSummary(); }
-  initialRender();
+  // init
+  renderTemplateShelf(); refreshCustomPick(); updateUI(); refreshSummary();
   </script>
 </body>
 </html>
