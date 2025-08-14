@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Project Data Dashboard (Offline Version)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .chart-container { position: relative; width: 100%; background-color: white; padding: 2rem; border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .chart-wrapper { position: relative; width: 100%; height: 450px; }
+        .file-input-label { cursor: pointer; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; transition: background-color 0.3s; }
+        .file-input-label.loaded { background-color: #10b981; color: white; }
+        .file-input-label.unloaded { background-color: #6366f1; color: white; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="mx-auto max-w-7xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📊 Interactive Project Data Dashboard (Offline)</h1>
+            <p class="text-gray-600 mt-2">Upload your full CSV datasets for 2024 and 2025 to generate visualizations.</p>
+        </header>
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div>
+                <label for="csv-upload-2024" id="label-2024" class="file-input-label unloaded">📤 Upload 2024 Data</label>
+                <input type="file" id="csv-upload-2024" class="hidden" accept=".csv">
+                <span id="filename-2024" class="ml-2 text-sm text-gray-500">No file selected.</span>
+            </div>
+            <div>
+                <label for="csv-upload-2025" id="label-2025" class="file-input-label unloaded">📤 Upload 2025 Data</label>
+                <input type="file" id="csv-upload-2025" class="hidden" accept=".csv">
+                <span id="filename-2025" class="ml-2 text-sm text-gray-500">No file selected.</span>
+            </div>
+        </div>
+        <div id="dashboard-content" class="hidden">
+            <!-- Top Charts -->
+            <div class="chart-container">
+                <h2 class="text-xl font-semibold text-center mb-4 text-gray-700">Year-over-Year Regional Comparison (All Statuses)</h2>
+                <div class="chart-wrapper"><canvas id="comparisonByRegionChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Project Count by Status</h2>
+                    <select id="status-region-filter" class="p-1 text-sm border rounded-md bg-white shadow-sm"></select>
+                </div>
+                <div class="chart-wrapper"><canvas id="statusComparisonChart"></canvas></div>
+            </div>
+            <!-- Other Charts -->
+            <div class="chart-container">
+                <h2 class="text-xl font-semibold text-center mb-4 text-gray-700">Energy Project Type by Region</h2>
+                <div class="chart-wrapper"><canvas id="energyTypeChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h2 class="text-xl font-semibold text-center mb-4 text-gray-700">Project Count by Category and Region</h2>
+                <div id="category-subplots-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
+            </div>
+            <div class="chart-container">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-700">Detailed View: Project Count by Status and Region</h2>
+                    <select id="region-filter" class="p-1 text-sm border rounded-md bg-white shadow-sm mt-4 sm:mt-0" multiple size="4"></select>
+                </div>
+                <div id="status-subplots-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
+            </div>
+        </div>
+        <div id="initial-message" class="text-center py-16 text-gray-500"><p class="text-xl">Please upload both CSV files to begin analysis.</p></div>
+    </div>
+    <script>
+        Chart.register(ChartDataLabels);
+        let projectData2024 = [], projectData2025 = [], charts = {};
+        const fileInput2024 = document.getElementById('csv-upload-2024');
+        const fileInput2025 = document.getElementById('csv-upload-2025');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const initialMessage = document.getElementById('initial-message');
+        const regionFilter = document.getElementById('region-filter');
+        const statusRegionFilter = document.getElementById('status-region-filter');
+
+        fileInput2024.addEventListener('change', e => handleFileUpload(e, '2024'));
+        fileInput2025.addEventListener('change', e => handleFileUpload(e, '2025'));
+        regionFilter.addEventListener('change', () => {
+            const selected = Array.from(regionFilter.selectedOptions).map(opt => opt.value);
+            createStatusSubplots(selected.length ? selected : ['All']);
+        });
+        statusRegionFilter.addEventListener('change', () => createStatusComparisonChart(statusRegionFilter.value));
+
+        function handleFileUpload(event, year) {
+            const file = event.target.files[0]; if (!file) return;
+            document.getElementById(`filename-${year}`).textContent = file.name;
+            const label = document.getElementById(`label-${year}`);
+            label.classList.replace('unloaded', 'loaded'); label.textContent = `✔️ ${year} Data Loaded`;
+            Papa.parse(file, { header: true, skipEmptyLines: true, complete: res => {
+                if (year === '2024') projectData2024 = res.data;
+                else projectData2025 = res.data;
+                if (projectData2024.length && projectData2025.length) {
+                    initialMessage.style.display = 'none';
+                    dashboardContent.style.display = 'block';
+                    populateRegionFilters();
+                    renderAllCharts();
+                }
+            }});
+        }
+
+        function populateRegionFilters() {
+            const regions = [...new Set([...projectData2024, ...projectData2025].map(d => d.Region))].filter(Boolean).sort();
+            regionFilter.innerHTML = '<option value="All" selected>All Regions</option>';
+            statusRegionFilter.innerHTML = '<option value="All">All Regions</option>';
+            regions.forEach(r => { 
+                regionFilter.append(new Option(r, r)); 
+                statusRegionFilter.append(new Option(r, r)); 
+            });
+        }
+
+        function renderAllCharts() {
+            Object.values(charts).forEach(c => c.destroy()); charts = {};
+            createComparisonByRegionChart();
+            createStatusComparisonChart('All');
+            createEnergyTypeChart();
+            createCategorySubplots();
+            createStatusSubplots('All');
+        }
+
+        // Helper to categorize projects
+        function getProjectCategory(p) {
+            const txt = ((p.Project || '') + ' ' + (p.PlantName || '')).toLowerCase();
+            if (/renewable|bio|saf/.test(txt)) return 'Renewable/BIO/SAF';
+            if (/fertilizer/.test(txt)) return 'Others (Fertilizer)';
+            if (/refinery|cdu|diesel|gasoline|kerosene/.test(txt)) return 'Refinery';
+            if (/gas|ngl|lpg|lng/.test(txt)) return 'Gas/NGL/LPG';
+            return 'Petrochemical';
+        }
+        function getEnergyType(p) { return getProjectCategory(p) === 'Renewable/BIO/SAF' ? 'Sustainable' : 'Conventional'; }
+
+        const colors = { '2024': '#7c3aed', '2025': '#10b981' };
+        const convColors = { '2024': '#f97316', '2025': '#ef4444' }, sustColors = { '2024': '#84cc16', '2025': '#22c55e' };
+        const legendConfig = { position: 'bottom', labels: { font: { size: 12 }, boxWidth: 20 } };
+        const datalabelsConfig = { anchor: 'end', align: 'top', formatter: v => v > 0 ? v : '', color: '#4b5563', font: { weight: 'bold' } };
+
+        function createComparisonByRegionChart() {
+            const c24 = {}, c25 = {};
+            projectData2024.forEach(d => c24[d.Region] = (c24[d.Region]||0)+1);
+            projectData2025.forEach(d => c25[d.Region] = (c25[d.Region]||0)+1);
+            const regions = [...new Set([...Object.keys(c24), ...Object.keys(c25)])];
+            const data = regions.map(r => ({ r, v24: c24[r]||0, v25: c25[r]||0 }));
+            data.sort((a,b) => (b.v24+b.v25) - (a.v24+a.v25));
+            const labels = data.map(d => d.r), d24 = data.map(d => d.v24), d25 = data.map(d => d.v25);
+            const m = Math.max(...d24, ...d25);
+            const ctx = document.getElementById('comparisonByRegionChart').getContext('2d');
+            charts.comparison = new Chart(ctx, {
+                type: 'bar', data: { labels, datasets: [
+                    { label: '2024 Projects', data: d24, backgroundColor: colors['2024'] },
+                    { label: '2025 Projects', data: d25, backgroundColor: colors['2025'] }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: m ? Math.ceil(m*1.2) : 5 } }, plugins: { legend: legendConfig, datalabels: datalabelsConfig } }
+            });
+        }
+
+        function createStatusComparisonChart(region) {
+            const map = { 'U': 'Under Construction', 'J': 'Just Announced', 'P': 'Planning', 'H': 'Hold' };
+            const d24 = [], d25 = [];
+            Object.keys(map).forEach(s => {
+                d24.push(projectData2024.filter(d => (region==='All'||d.Region===region)&&d.Status===s).length);
+                d25.push(projectData2025.filter(d => (region==='All'||d.Region===region)&&d.Status===s).length);
+            });
+            const labels = Object.values(map), m = Math.max(...d24, ...d25);
+            const ctx = document.getElementById('statusComparisonChart').getContext('2d');
+            if (charts.status) charts.status.destroy();
+            charts.status = new Chart(ctx, {
+                type: 'bar', data: { labels, datasets: [
+                    { label: '2024', data: d24, backgroundColor: colors['2024'] },
+                    { label: '2025', data: d25, backgroundColor: colors['2025'] }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: m ? Math.ceil(m*1.2) : 5 } }, plugins: { legend: legendConfig, datalabels: datalabelsConfig } }
+            });
+        }
+
+        function createEnergyTypeChart() {
+            const regions = [...new Set([...projectData2024, ...projectData2025].map(d => d.Region))].filter(Boolean);
+            const data = regions.map(r => ({
+                r,
+                c24: projectData2024.filter(d => d.Region===r && getEnergyType(d)==='Conventional').length,
+                c25: projectData2025.filter(d => d.Region===r && getEnergyType(d)==='Conventional').length,
+                s24: projectData2024.filter(d => d.Region===r && getEnergyType(d)==='Sustainable').length,
+                s25: projectData2025.filter(d => d.Region===r && getEnergyType(d)==='Sustainable').length
+            }));
+            data.sort((a,b) => (b.c24+b.c25+b.s24+b.s25) - (a.c24+a.c25+a.s24+a.s25));
+            const labels = data.map(d=>d.r), c24 = data.map(d=>d.c24), c25 = data.map(d=>d.c25), s24 = data.map(d=>d.s24), s25 = data.map(d=>d.s25);
+            const m = Math.max(...c24, ...c25, ...s24, ...s25);
+            const ctx = document.getElementById('energyTypeChart').getContext('2d');
+            charts.energy = new Chart(ctx, {
+                type: 'bar', data: { labels, datasets: [
+                    { label: 'Conv. 2024', data: c24, backgroundColor: convColors['2024'] },
+                    { label: 'Conv. 2025', data: c25, backgroundColor: convColors['2025'] },
+                    { label: 'Sust. 2024', data: s24, backgroundColor: sustColors['2024'] },
+                    { label: 'Sust. 2025', data: s25, backgroundColor: sustColors['2025'] }
+                ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: m ? Math.ceil(m*1.2) : 5 } }, plugins: { legend: legendConfig, datalabels: datalabelsConfig } }
+            });
+        }
+
+        function createCategorySubplots() {
+            const container = document.getElementById('category-subplots-container'); container.innerHTML = '';
+            const cats = ['Refinery','Petrochemical','Gas/NGL/LPG','Renewable/BIO/SAF','Others (Fertilizer)'];
+            cats.forEach(cat => {
+                const wrapper = document.createElement('div');
+                const title = document.createElement('h3'); title.textContent = cat; title.className = 'text-lg font-semibold text-center mb-2 text-gray-600';
+                const cw = document.createElement('div'); cw.className = 'chart-wrapper'; const cnv = document.createElement('canvas'); cw.appendChild(cnv);
+                wrapper.appendChild(title); wrapper.appendChild(cw); container.appendChild(wrapper);
+                const regions = [...new Set([...projectData2024, ...projectData2025].map(d => d.Region))].filter(Boolean);
+                const data = regions.map(r => ({ r,
+                    n24: projectData2024.filter(d => d.Region===r && getProjectCategory(d)===cat).length,
+                    n25: projectData2025.filter(d => d.Region===r && getProjectCategory(d)===cat).length
+                }));
+                data.sort((a,b)=>(b.n24+b.n25)-(a.n24+a.n25));
+                const labels = data.map(d=>d.r), n24 = data.map(d=>d.n24), n25 = data.map(d=>d.n25);
+                const m = Math.max(...n24, ...n25);
+                const ctx = cnv.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar', data: { labels, datasets: [
+                        { label: '2024', data: n24, backgroundColor: colors['2024'] },
+                        { label: '2025', data: n25, backgroundColor: colors['2025'] }
+                    ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: m ? Math.ceil(m*1.2) : 5 } }, plugins: { legend: legendConfig, datalabels: datalabelsConfig } }
+                });
+            });
+        }
+
+        function createStatusSubplots(selectedRegions) {
+            const container = document.getElementById('status-subplots-container'); container.innerHTML = '';
+            const map = { 'U':'Under Construction','J':'Just Announced','P':'Planning','H':'Hold' };
+            let regions;
+            if (Array.isArray(selectedRegions)) {
+                if (selectedRegions.includes('All')) {
+                    regions = [...new Set([...projectData2024, ...projectData2025].map(d=>d.Region))].filter(Boolean);
+                } else {
+                    regions = selectedRegions;
+                }
+            } else {
+                regions = selectedRegions === 'All'
+                    ? [...new Set([...projectData2024, ...projectData2025].map(d=>d.Region))].filter(Boolean)
+                    : [selectedRegions];
+            }
+            Object.keys(map).forEach(s => {
+                const wrapper = document.createElement('div');
+                const title = document.createElement('h3'); title.textContent = map[s]; title.className = 'text-lg font-semibold text-center mb-2 text-gray-600';
+                const cw = document.createElement('div'); cw.className='chart-wrapper'; const cnv = document.createElement('canvas'); cw.appendChild(cnv);
+                wrapper.appendChild(title); wrapper.appendChild(cw); container.appendChild(wrapper);
+                const data = regions.map(r => ({ r,
+                    v24: projectData2024.filter(d => d.Region===r && d.Status===s).length,
+                    v25: projectData2025.filter(d => d.Region===r && d.Status===s).length
+                }));
+                data.sort((a,b)=>(b.v24+b.v25)-(a.v24+a.v25));
+                const labels = data.map(d=>d.r), v24 = data.map(d=>d.v24), v25 = data.map(d=>d.v25);
+                const m = Math.max(...v24, ...v25);
+                const ctx = cnv.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar', data: { labels, datasets: [
+                        { label: '2024', data: v24, backgroundColor: colors['2024'] },
+                        { label: '2025', data: v25, backgroundColor: colors['2025'] }
+                    ] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: m ? Math.ceil(m*1.2) : 5 } }, plugins: { legend: legendConfig, datalabels: datalabelsConfig } }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Middle East & Africa H₂ Energy Projects</title>
+    <!-- Leaflet Map Library CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base Page Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Light background */
+            color: #1a202c;
+            display: flex;
+            flex-direction: column; /* Allow vertical stacking */
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0; /* Add padding for spacing */
+        }
+
+        /* Container for map and title */
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            max-width: 1200px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px; /* Space between map and summary */
+        }
+
+        /* Header Section */
+        .header {
+            background-color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c5282; /* Accent color */
+        }
+        .header p {
+            margin: 5px 0 0;
+            color: #4a5568;
+        }
+
+        /* Map DOM Element */
+        #map {
+            width: 100%;
+            height: 600px;
+            background-color: #e2e8f0;
+        }
+        
+        /* Permanent Label Styles */
+        .leaflet-tooltip-permanent {
+            background: #ffffff;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+            padding: 8px 12px;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+        .tooltip-title {
+            font-weight: bold;
+            font-size: 1.05em;
+            margin-bottom: 4px;
+        }
+
+        /* Legend Styles */
+        .legend {
+            padding: 10px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            color: #2d3748;
+        }
+        .legend h4 {
+            margin: 0 0 5px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+        .legend i {
+            width: 16px;
+            height: 16px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.9;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Comparison Legend Styles */
+        .comparison-legend {
+            line-height: 24px;
+        }
+        .comparison-legend .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .comparison-legend .circle {
+            border-radius: 50%;
+            background-color: #718096;
+            border: 1px solid #4a5568;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        /* Summary Table Styles */
+        .summary-container {
+            width: 95%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .summary-container h2 {
+            text-align: center;
+            color: #2c5282;
+            margin-top: 0;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .summary-table th, .summary-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .summary-table th {
+            background-color: #f7fafc;
+            font-weight: 700;
+        }
+        .summary-table td {
+            color: #4a5568;
+        }
+        .summary-table tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Middle East & Africa H₂ Energy Projects</h1>
+        <p>Circle size is proportional to production capacity. Labels are always visible.</p>
+    </div>
+    <div id="map"></div>
+</div>
+
+<div class="summary-container">
+    <h2>Regional Hydrogen Strategy Comparison</h2>
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Region</th>
+                <th>Key Strategy</th>
+                <th>Project Focus</th>
+                <th>No. of Projects (Approx.)</th>
+                <th>Relative Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Middle East & Africa (MEA)</td>
+                <td>Export Hub</td>
+                <td>Mega-scale Green/Blue</td>
+                <td>50+</td>
+                <td>Projects are large-scale, but the overall ecosystem is in early stages.</td>
+            </tr>
+            <tr>
+                <td>Europe</td>
+                <td>Decarbonization & Tech</td>
+                <td>Diverse Portfolio</td>
+                <td>400+</td>
+                <td>Highest number of projects; active policy and infrastructure investment.</td>
+            </tr>
+            <tr>
+                <td>USA</td>
+                <td>Domestic Production & Hubs</td>
+                <td>Blue-focused, Regional Hubs</td>
+                <td>150+</td>
+                <td>Focus on large government-led hubs and infrastructure development.</td>
+            </tr>
+             <tr>
+                <td>China</td>
+                <td>Domestic Leadership</td>
+                <td>Full value chain (production to use)</td>
+                <td>500+</td>
+                <td>World's largest producer; rapidly expanding green H2 for domestic use.</td>
+            </tr>
+            <tr>
+                <td>Australia</td>
+                <td>Green Export Powerhouse</td>
+                <td>Giga-scale Green H₂/Ammonia</td>
+                <td>40+</td>
+                <td>Aims to be a top global exporter to Asia, leveraging vast renewables.</td>
+            </tr>
+            <tr>
+                <td>Japan</td>
+                <td>Energy Security & Imports</td>
+                <td>Import Chains & Utilization Tech</td>
+                <td>30+</td>
+                <td>Strong in import infrastructure and utilization tech (mobility, power).</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Leaflet Map Library JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<script>
+    // Project data with explicit coordinates for labels
+    const projects = [
+      { name: 'NEOM Green Hydrogen', country: 'Saudi Arabia', type: 'Green', output: '1.2M Tons/Year (Ammonia)', completion: '2026', coordinates: [28.5, 35.5], production: 1200, labelCoordinates: [30.5, 37.5] },
+      { name: 'Ruwais Blue Ammonia', country: 'UAE', type: 'Blue', output: '1M Tons/Year (Ammonia)', completion: '2025', coordinates: [24.1, 52.7], production: 1000, labelCoordinates: [21.7, 55.9] },
+      { name: 'KEZAD Green Ammonia', country: 'UAE', type: 'Green', output: '165k Tons/Year (Ammonia)', completion: '2028', coordinates: [24.4, 54.6], production: 165, labelCoordinates: [26.8, 57.0] },
+      { name: 'Duqm Hydrogen Project', country: 'Oman', type: 'Green', output: '1.2M Tons/Year (Ammonia)', completion: '2027 (FID)', coordinates: [19.6, 57.7], production: 1200, labelCoordinates: [22.0, 63.5] },
+      { name: 'ACME/Hydrom Hub', country: 'Oman', type: 'Green', output: '~1.1M Tons/Year (Ammonia)', completion: '2030', coordinates: [18.0, 55.5], production: 1100, labelCoordinates: [14.8, 59.5] },
+      { name: 'Qatar Blue Ammonia Plant', country: 'Qatar', type: 'Blue', output: '1.2M Tons/Year (Ammonia)', completion: '2026', coordinates: [25.9, 51.5], production: 1200, labelCoordinates: [31.0, 52.5] }, // Moved further up
+      { name: 'Scatec/Fertiglobe Plant', country: 'Egypt', type: 'Green', output: '~15k Tons/Year (Hydrogen)', completion: 'Operational', coordinates: [29.6, 32.3], production: 15, labelCoordinates: [30.8, 27.1] },
+      { name: 'Masdar-Hassan Allam Plant', country: 'Egypt', type: 'Green', output: '480k Tons/Year (Hydrogen)', completion: '2026', coordinates: [30.8, 32.4], production: 480, labelCoordinates: [32.8, 33.0] },
+      { name: 'Jafurah Gas Field', country: 'Saudi Arabia', type: 'Blue', output: 'Large-scale (Ammonia)', completion: 'In Progress', coordinates: [25.5, 49.5], production: 1000, labelCoordinates: [23.9, 47.5] },
+      { name: 'Sitra Clean Hydrogen', country: 'Bahrain', type: 'Mixed', output: 'Refinery Supply', completion: 'Operational', coordinates: [26.1, 50.6], production: 10, labelCoordinates: [27.9, 48.8] },
+    ];
+
+    const map = L.map('map').setView([25, 45], 4);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+    }).addTo(map);
+
+    const getColor = (type) => {
+        switch (type) {
+            case 'Green': return '#2f855a';
+            case 'Blue': return '#2b6cb0';
+            default: return '#b7791f';
+        }
+    };
+    
+    const maxProduction = 1200; // Max production in the dataset (in k-tons)
+    const calculateRadius = (production) => 4 + (production / maxProduction) * 20;
+
+    projects.forEach(project => {
+        const color = getColor(project.type);
+        const radius = calculateRadius(project.production);
+        
+        // Add the main circle marker
+        const marker = L.circleMarker(project.coordinates, {
+            radius: radius,
+            fillColor: color,
+            color: "#fff",
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        // Add the leader line
+        const leaderLine = L.polyline([project.coordinates, project.labelCoordinates], {
+            color: '#2d3748', // Darker color
+            weight: 2,         // Thicker line
+        }).addTo(map);
+
+        // Tooltip (Permanent Label) Content
+        const tooltipContent = `
+            <div class="tooltip-title" style="color: ${color};">${project.name}</div>
+            <div>${project.output}</div>
+        `;
+        
+        // Add a transparent marker at the end of the line to anchor the tooltip
+        const labelAnchor = L.marker(project.labelCoordinates, {
+            icon: L.divIcon({ className: 'leaflet-div-icon-transparent', iconSize: [0,0] })
+        }).addTo(map);
+
+        labelAnchor.bindTooltip(tooltipContent, {
+            permanent: true,
+            direction: 'center',
+            className: 'leaflet-tooltip-permanent',
+            offset: [0, 0] // Centered on the anchor
+        }).openTooltip();
+    });
+
+    // Hydrogen Type Legend
+    const typeLegend = L.control({position: 'bottomright'});
+    typeLegend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'legend');
+        const types = [
+            {name: 'Green Hydrogen', color: getColor('Green')},
+            {name: 'Blue Hydrogen', color: getColor('Blue')},
+            {name: 'Mixed/Other', color: getColor('Mixed')}
+        ];
+        let legendHtml = '<h4>Hydrogen Type</h4>';
+        for (let i = 0; i < types.length; i++) {
+            legendHtml += `<i style="background:${types[i].color}"></i>${types[i].name}<br>`;
+        }
+        div.innerHTML = legendHtml;
+        return div;
+    };
+    typeLegend.addTo(map);
+
+    // Production Scale Comparison Legend
+    const comparisonLegend = L.control({position: 'topright'});
+    comparisonLegend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'legend comparison-legend');
+        const scales = [
+            { name: 'Japan (Mid-Scale)', production: 50 },
+            { name: 'USA (Mid-Scale)', production: 100 },
+            { name: 'Europe (Mid-Scale)', production: 500 }
+        ];
+        let legendHtml = '<h4>Production Scale Comparison</h4>';
+        scales.forEach(scale => {
+            const radius = calculateRadius(scale.production);
+            legendHtml += `
+                <div class="legend-item">
+                    <div class="circle" style="width:${radius*2}px; height:${radius*2}px;"></div>
+                    <span>${scale.name}: ${scale.production}k tons/yr</span>
+                </div>
+            `;
+        });
+        div.innerHTML = legendHtml;
+        return div;
+    };
+    comparisonLegend.addTo(map);
+
+</script>
+
+</body>
+</html>
