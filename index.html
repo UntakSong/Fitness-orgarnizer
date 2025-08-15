@@ -3,189 +3,155 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>피트니스 코치 – V5.1 (빠른편집 복원)</title>
-  <meta name="description" content="실내/맨몸/달리기/걷기/웨이트용 단일 HTML 앱. 빠른편집(모달) + 크레센도 예고 + 템플릿 + GPS + 히스토리." />
+  <title>피트니스 코치 – V5.7 (라이트+포커스+PWA)</title>
+  <meta name="description" content="단일 HTML 앱. 라이트/다크, 포커스 모드, 빠른편집(모달), 템플릿, 크레센도, 인스턴트 리셋, GPS." />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#00C167">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
-    :root{--bg:#0b0f14;--card:#121922;--ink:#e9f0f7;--muted:#92a2b3;--accent:#2bd576;--accent-2:#54a6ff;--danger:#ff6b6b;--warn:#ffb020;--br:16px;--pad:14px;--pad-lg:16px;--gap:12px;--shadow:0 10px 25px rgba(0,0,0,.25)}
-    *{box-sizing:border-box}
-    html,body{height:100%} html{color-scheme:dark}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink)}
-    header{position:sticky;top:0;background:rgba(11,15,20,.85);backdrop-filter:blur(6px);z-index:10;border-bottom:1px solid #141b24}
-    .wrap{max-width:980px;margin:0 auto;padding:0 var(--pad-lg)}
-    .row{display:flex;gap:var(--gap);flex-wrap:wrap}
-    .between{display:flex;align-items:center;justify-content:space-between}
+    :root{--bg:#F6FAFF;--card:#FFFFFF;--ink:#0E1726;--muted:#5C6B7B;--accent:#00C167;--accent-2:#2F7CFF;--danger:#FF6B6B;--warn:#FFB020;--br:16px;--pad:14px;--pad-lg:16px;--gap:12px;--line:#E6EEF7;--chip:#EFF6FF;--chip2:#EFFFF6;--shadow:0 12px 30px rgba(9,25,55,.08)}
+    html[data-theme="dark"]{--bg:#0b0f14;--card:#121922;--ink:#e9f0f7;--muted:#92a2b3;--accent:#2bd576;--accent-2:#54a6ff;--danger:#ff6b6b;--warn:#ffb020;--line:#1b2633;--chip:#0e1620;--chip2:#0f1f12;--shadow:0 10px 25px rgba(0,0,0,.25)}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink)}
+    header{position:sticky;top:0;background:linear-gradient(135deg,#EBFFF6 0%,#ECF2FF 100%);border-bottom:1px solid var(--line);z-index:10}
+    html[data-theme="dark"] header{background:rgba(11,15,20,.85);backdrop-filter:blur(6px)}
+    .wrap{max-width:980px;margin:0 auto;padding:0 var(--pad-lg)} .between{display:flex;align-items:center;justify-content:space-between} .row{display:flex;gap:var(--gap);flex-wrap:wrap}
+    .title{font-size:1.4rem;font-weight:700;letter-spacing:.2px}
     .nav{display:flex;gap:8px;padding:10px 0;flex-wrap:wrap}
-    .nav button{background:#0e141d;border:1px solid #1c2735;color:var(--ink);padding:10px 14px;border-radius:999px;cursor:pointer}
+    .nav button{background:#fff;border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:999px;cursor:pointer}
     .nav button[aria-current="page"]{background:var(--accent-2);border-color:transparent;color:#07121f}
-    main{padding:18px 0 36px}
-    section{display:none} section.active{display:block}
-    .card{background:var(--card);border:1px solid #1b2633;border-radius:var(--br);box-shadow:var(--shadow);padding:var(--pad-lg)}
-    .card h3{margin:0 0 8px;font-size:1.1rem}
-    .grid{display:grid;gap:var(--gap)} .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
-    @media (max-width:780px){.g2,.g3{grid-template-columns:1fr}}
-    .pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;border:1px solid #253241;background:#0e1620;color:var(--ink);font-size:.9rem}
-    .pill small{color:var(--muted)}
-    .btn{appearance:none;border:1px solid #233041;background:#0e1620;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
-    .btn.primary{background:var(--accent);border-color:transparent;color:#071b10;font-weight:600}
-    .btn.alt{background:#11263a;border-color:#234b73} .btn.warn{background:var(--warn);border-color:transparent;color:#2a1900}
-    .btn.danger{background:var(--danger);border-color:transparent;color:#2a0000} .btn.ghost{background:transparent;border-color:#2a3a4d}
+    main{padding:18px 0 36px} [hidden]{display:none !important}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--br);box-shadow:var(--shadow);padding:var(--pad-lg)} .card h3{margin:0 0 8px;font-size:1.1rem}
+    .grid{display:grid;gap:var(--gap)} .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} @media (max-width:780px){.g2,.g3{grid-template-columns:1fr}}
+    .pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-size:.9rem} .pill small{color:var(--muted)}
+    .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:transparent;color:#062612;font-weight:700}
+    .btn.alt{background:var(--chip);border-color:transparent;border-radius:999px;padding:10px 16px}
+    .btn.warn{background:var(--warn);border-color:transparent;color:#2a1900} .btn.danger{background:var(--danger);border-color:transparent;color:#2a0000} .btn.ghost{background:transparent;border:1px dashed var(--line)}
     .btn:disabled{opacity:.5;cursor:not-allowed}
     label{display:block;color:var(--muted);font-size:.9rem;margin-bottom:6px}
-    input[type=text],input[type=number],select,textarea{width:100%;background:#0d1420;border:1px solid #203046;color:var(--ink);-webkit-text-fill-color:var(--ink);caret-color:var(--ink);padding:10px;border-radius:10px}
-    input::placeholder, textarea::placeholder{color:#7f91a3;opacity:1}
-    input:focus, select:focus, textarea:focus{outline:0;border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(84,166,255,.15)}
-    input[type=number]{appearance:textfield}
-    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{appearance:none;margin:0}
-    table{width:100%;border-collapse:collapse} th,td{padding:10px;border-bottom:1px solid #203046;text-align:left} th{color:#a8b5c3;font-weight:600}
-    .tiny{font-size:.85rem;color:var(--muted)} .muted{color:var(--muted)} .title{font-size:1.4rem;font-weight:700;letter-spacing:.2px}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#0b2036;border:1px solid #21486e;color:#9fccff;font-size:.8rem}
-    .controls{display:flex;gap:8px;flex-wrap:wrap}
-    .ex-add{display:grid;grid-template-columns:1.3fr .8fr .6fr .6fr .6fr .6fr .7fr auto;gap:8px;align-items:center}
-    @media (max-width:980px){.ex-add{grid-template-columns:1fr 1fr 1fr 1fr}}
-    .ex-row{display:flex;flex-direction:column;gap:8px}
-    .progress{height:10px;background:#0a1320;border:1px solid #1c304a;border-radius:999px;overflow:hidden}
-    .progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#9effc8)}
-    .hint{padding:8px 12px;border:1px dashed #2a3a4d;border-radius:10px;background:#0f1620;color:#a8b5c3}
-    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f1f12;border:1px solid #1e3a26;color:#bff3cc;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
-    .toast.show{opacity:1}
-    /* Quick Edit Modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:30}
-    .modal.show{display:flex}
-    .sheet{width:min(980px,95vw);max-height:90vh;overflow:auto;background:var(--card);border:1px solid #1b2633;border-radius:16px;box-shadow:var(--shadow);padding:16px}
-    .qe-table th,.qe-table td{white-space:nowrap}
-    .qe-table input[type=number]{width:90px}
-    .qe-table input[type=text]{min-width:160px}
+    input[type=text],input[type=number],select,textarea{width:100%;background:#fff;border:1px solid var(--line);color:var(--ink);padding:10px;border-radius:10px}
+    input::placeholder, textarea::placeholder{color:#8aa0b6;opacity:1}
+    input:focus, select:focus, textarea:focus{outline:0;border-color:var(--accent-2);box-shadow:0 0 0 3px rgba(47,124,255,.15)}
+    .tiny{font-size:.85rem;color:var(--muted)} .hint{padding:8px 12px;border:1px dashed var(--line);border-radius:10px;background:#F3F8FF;color:#3b4b59} html[data-theme="dark"] .hint{background:#0f1620;color:#a8b5c3;border-color:#2a3a4d}
+    .progress{height:14px;background:#E9F1FA;border:1px solid var(--line);border-radius:999px;overflow:hidden} .progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#7DFFD0)}
+    #remaining{font-weight:800;font-size:clamp(48px,9vw,96px)}
+    .player.resting{animation:breathe 2.2s linear infinite} .player.warning{animation:breathe 1.2s linear infinite}
+    @keyframes breathe{0%{box-shadow:0 0 0 0 rgba(0,193,103,.20)}70%{box-shadow:0 0 0 16px rgba(0,193,103,0)}100%{box-shadow:0 0 0 0 rgba(0,193,103,0)}}
+    /* Focus mode: leave only player card visible */
+    .focus-mode main .card:not(.player){display:none !important}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap between">
-      <div class="title">🏃‍♂️ 피트니스 코치 <span class="tag">V5.1</span></div>
+      <div class="title">🏃‍♂️ 피트니스 코치 <span class="tiny" style="margin-left:6px">V5.7</span></div>
       <nav class="nav" aria-label="Sections">
         <button data-goto="workout" aria-current="page">워크아웃</button>
-        <button data-goto="builder">빌더</button>
-        <button data-goto="alerts">알림</button>
-        <button data-goto="history">히스토리</button>
+        <button data-goto="settings">설정</button>
         <button data-goto="about">정보</button>
+        <button class="btn ghost" id="themeToggle" title="테마 전환">☀︎ 에너지</button>
+        <button id="installBtn" class="btn" style="display:none">📲 설치</button>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
     <!-- WORKOUT -->
-    <section id="workout" class="active grid" aria-label="Workout">
-      <div class="hint">🟢 빠른시작 항목을 누르면 <b>빠른편집(모달)</b>이 열립니다. 수정 후 <b>적용</b> 또는 <b>▶ 적용하고 시작</b>을 누르세요.</div>
-      <div class="card">
-        <h3>빠른 시작</h3>
-        <div class="row">
-          <button class="btn alt" data-template="indoorIntervals">실내 인터벌</button>
-          <button class="btn alt" data-template="bodyweight">맨몸 루틴</button>
-          <button class="btn alt" data-template="runIntervals">달리기 인터벌</button>
-          <button class="btn alt" data-template="walk30">걷기 30분</button>
-          <button class="btn alt" data-template="weights5x5">웨이트 5×5</button>
-          <select id="customPick" class="btn" style="padding:10px 10px"><option value="">내 템플릿 불러오기…</option></select>
-        </div>
-      </div>
+    <section id="workout" aria-label="Workout">
+      <div class="grid">
+        <div class="hint">🟢 메인 화면입니다. 빠른시작 항목을 누르면 <b>빠른편집(모달)</b>이 열려 즉시 커스터마이즈할 수 있어요.</div>
 
-      <div class="card" aria-live="polite">
-        <div class="between"><h3>세션 진행</h3><span class="pill"><small>상태</small> <b id="status">대기</b></span></div>
-        <div class="grid g3">
-          <div><label>현재 운동</label><div id="now-ex" class="pill" style="min-height:38px">-</div></div>
-          <div><label>세트</label><div id="now-set" class="pill">-</div></div>
-          <div><label>반복/시간</label><div id="now-detail" class="pill">-</div></div>
+        <div class="card">
+          <h3>빠른 시작</h3>
+          <div class="row">
+            <button class="btn alt" data-template="indoorIntervals">🏠 실내 인터벌</button>
+            <button class="btn alt" data-template="bodyweight">💪 맨몸 루틴</button>
+            <button class="btn alt" data-template="runIntervals">🏃 달리기 인터벌</button>
+            <button class="btn alt" data-template="walk30">🚶 걷기 30분</button>
+            <button class="btn alt" data-template="weights5x5">🏋️ 5×5</button>
+            <select id="customPick" class="btn" style="padding:10px 10px"><option value="">내 템플릿 불러오기…</option></select>
+          </div>
         </div>
-        <div style="margin:14px 0"><div class="progress" aria-hidden="true"><i id="bar"></i></div>
-          <div class="between tiny muted" style="margin-top:6px"><span id="countdown-label">남은 시간</span><span id="remaining">00:00</span></div>
-        </div>
-        <div class="controls">
-          <button class="btn primary" id="startBtn">▶ 시작</button>
-          <button class="btn" id="pauseBtn" disabled>⏸ 일시정지</button>
-          <button class="btn ghost" id="skipBtn" disabled>⏭ 다음</button>
-          <button class="btn warn" id="repBtn" disabled>➕ 반복(+1)</button>
-          <button class="btn danger" id="resetBtn" disabled>⟲ 리셋</button>
-        </div>
-      </div>
 
-      <div class="card">
-        <h3>GPS 트래킹(달리기·걷기)</h3>
-        <div class="row">
-          <button class="btn" id="gpsStart">📍 시작</button>
-          <button class="btn ghost" id="gpsStop" disabled>■ 종료</button>
-          <span class="pill"><small>거리</small> <b id="gpsDist">0.00 km</b></span>
-          <span class="pill"><small>포인트</small> <b id="gpsPts">0</b></span>
+        <div class="card">
+          <div class="between" style="margin-bottom:6px">
+            <h3>현재 워크아웃</h3>
+            <div class="row">
+              <button class="btn" id="editCurrent">✎ 빠른편집</button>
+              <button class="btn primary" id="quickStart">▶ 이대로 시작</button>
+              <button class="btn ghost" id="clearCurrent">🗑 전체 지우기</button>
+            </div>
+          </div>
+          <p class="tiny" id="summary">-</p>
         </div>
-        <p class="tiny muted">위치 허용 시 좌표를 기록하고 총 거리를 계산합니다(하버사인).</p>
-      </div>
-    </section>
 
-    <!-- BUILDER -->
-    <section id="builder" class="grid" aria-label="Builder">
-      <div class="hint">🛠️ 운동을 설계·저장하는 화면입니다. 저장 후 워크아웃에서 실행하세요.</div>
-      <div class="card grid g2">
-        <div><label for="wname">워크아웃 이름</label><input id="wname" type="text" placeholder="예) 맨몸 전신 20분" /></div>
-        <div class="controls" style="align-self:end;justify-self:end"><button class="btn" id="saveTemplate">💾 템플릿 저장</button></div>
-      </div>
-      <div class="card">
-        <div class="between" style="margin-bottom:8px"><h3>운동 추가</h3><span class="tiny muted">필드 작성 후 ➕</span></div>
-        <div class="ex-add" id="addForm">
-          <div><label for="exName">운동명</label><input id="exName" type="text" placeholder="예) 스쿼트 / 러닝 하드" /></div>
-          <div><label for="exType">유형</label><select id="exType"><option value="reps">반복(회)</option><option value="time">시간(초)</option></select></div>
-          <div><label for="exSets">세트</label><input id="exSets" type="number" min="1" step="1" value="3" /></div>
-          <div id="repsWrap"><label for="exReps">반복(회)</label><input id="exReps" type="number" min="1" step="1" value="10" /></div>
-          <div id="timeWrap" style="display:none"><label for="exSecs">시간(초)</label><input id="exSecs" type="number" min="5" step="5" value="30" /></div>
-          <div><label for="exRest">휴식(초)</label><input id="exRest" type="number" min="0" step="5" value="30" /></div>
-          <div><label for="exTempo">템포(초/반복)</label><input id="exTempo" type="number" min="0" step="0.5" value="2" /></div>
-          <div><label for="exWarn">세트 종료 예고</label><input id="exWarn" type="number" min="0" step="1" value="3" /></div>
-          <div style="grid-column:1/-2"><label for="exNote">메모(선택)</label><input id="exNote" type="text" placeholder="예) 하체 집중" /></div>
-          <div style="align-self:end"><button class="btn primary" id="addExercise">➕ 리스트에 추가</button></div>
+        <div class="card player" aria-live="polite">
+          <div class="between"><h3>세션 진행</h3><div class="row"><button class="btn ghost" id="focusToggle">👁️ 포커스</button><span class="pill"><small>상태</small> <b id="status">대기</b></span></div></div>
+          <div class="grid g3">
+            <div><label>현재 운동</label><div id="now-ex" class="pill" style="min-height:38px">-</div></div>
+            <div><label>세트</label><div id="now-set" class="pill">-</div></div>
+            <div><label>반복/시간</label><div id="now-detail" class="pill">-</div></div>
+          </div>
+          <div style="margin:14px 0"><div class="progress" aria-hidden="true"><i id="bar"></i></div>
+            <div class="between tiny" style="margin-top:6px;color:var(--muted)"><span id="countdown-label">남은 시간</span><span id="remaining">00:00</span></div>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="startBtn">▶ 시작</button>
+            <button class="btn" id="pauseBtn" disabled>⏸ 일시정지</button>
+            <button class="btn ghost" id="skipBtn" disabled>⏭ 다음</button>
+            <button class="btn warn" id="repBtn" disabled>➕ 반복(+1)</button>
+            <button class="btn danger" id="resetBtn" disabled>⟲ 리셋</button>
+          </div>
         </div>
-        <div id="exList" class="grid" style="gap:8px;margin-top:12px"></div>
-      </div>
-      <div class="card grid g2" id="tplShelf">
-        <div>
-          <h3 style="margin-bottom:4px">생성된 워크아웃</h3>
-          <p class="tiny muted" id="summary">-</p>
-          <div class="controls" style="margin-top:6px"><button class="btn primary" id="loadToRun">▶ 이대로 시작</button><button class="btn ghost" id="clearAll">🗑 전체 지우기</button></div>
-        </div>
-        <div>
-          <h3 style="margin-bottom:4px">템플릿 보관함</h3>
+
+        <div class="card">
+          <h3>템플릿 보관함</h3>
           <div id="tplList" class="grid" style="gap:6px"></div>
-          <p class="tiny muted">저장/불러오기/삭제가 여기서 가능합니다.</p>
+          <p class="tiny">저장/불러오기/삭제/이름변경이 가능합니다.</p>
+        </div>
+
+        <div class="card">
+          <h3>GPS 트래킹(달리기·걷기)</h3>
+          <div class="row">
+            <button class="btn" id="gpsStart">📍 시작</button>
+            <button class="btn ghost" id="gpsStop" disabled>■ 종료</button>
+            <span class="pill"><small>거리</small> <b id="gpsDist">0.00 km</b></span>
+            <span class="pill"><small>포인트</small> <b id="gpsPts">0</b></span>
+          </div>
+          <p class="tiny">위치 허용 시 좌표를 기록하고 총 거리를 계산합니다(하버사인).</p>
         </div>
       </div>
     </section>
 
-    <!-- ALERTS/TTS -->
-    <section id="alerts" aria-label="Alerts" class="grid g2">
-      <div class="card">
-        <h3>음성 & 알림</h3>
-        <div class="row">
-          <div class="field"><label>음성 안내</label><select id="setTTS"><option value="on">사용</option><option value="off">미사용</option></select></div>
-          <div class="field"><label>한국어 음성</label><select id="setVoice"></select></div>
-          <div class="field"><label>카운트 멘트</label><select id="setCountCall"><option value="on">사용</option><option value="off">미사용</option></select></div>
-          <div class="field"><label>세트 종료 예고(초)</label><input id="setWarn" type="number" min="0" step="1" value="3" /></div>
+    <!-- SETTINGS -->
+    <section id="settings" aria-label="Settings" hidden>
+      <div class="grid g2">
+        <div class="card">
+          <h3>설정</h3>
+          <div class="row">
+            <div class="field"><label>음성 안내</label><select id="setTTS"><option value="on">사용</option><option value="off">미사용</option></select></div>
+            <div class="field"><label>한국어 음성</label><select id="setVoice"></select></div>
+            <div class="field"><label>카운트 멘트(반복형)</label><select id="setCountCall"><option value="on">사용</option><option value="off">미사용</option></select></div>
+            <div class="field"><label>세트 종료 예고(초)</label><input id="setWarn" type="number" min="0" step="1" value="3" /></div>
+          </div>
+          <p class="tiny">브라우저 정책상 첫 사용자 조작 이후에만 소리가 납니다.</p>
         </div>
-        <p class="tiny muted">브라우저 정책상 첫 클릭 이후에만 소리가 납니다.</p>
-      </div>
-    </section>
-
-    <!-- HISTORY -->
-    <section id="history" aria-label="History" class="grid">
-      <div class="card">
-        <div class="between"><h3>히스토리</h3>
-          <div class="controls"><button class="btn" id="exportData">📤 내보내기</button><button class="btn ghost" id="importData">📥 가져오기</button><input type="file" id="importFile" class="sr-only" accept="application/json" /></div>
-        </div>
-        <table><thead><tr><th>일시</th><th>이름</th><th>소요</th><th>요약</th></tr></thead><tbody id="histBody"></tbody></table>
       </div>
     </section>
 
     <!-- ABOUT -->
-    <section id="about" aria-label="About" class="grid g2">
-      <div class="card"><h3>정보</h3>
-        <ul>
-          <li>단일 HTML 파일, 오프라인 동작.</li>
-          <li>Android/iOS: 첫 사용자 조작 이후 오디오 활성화.</li>
-        </ul>
+    <section id="about" aria-label="About" hidden>
+      <div class="grid g2">
+        <div class="card"><h3>정보</h3>
+          <ul>
+            <li>단일 HTML 파일, 오프라인 동작.</li>
+            <li>Android/iOS: 첫 사용자 조작 이후 오디오 활성화.</li>
+            <li>설정/정보 탭은 워크아웃과 <b>상호배타</b>로 표시됩니다.</li>
+          </ul>
+        </div>
       </div>
     </section>
   </main>
@@ -196,7 +162,7 @@
       <div class="between" style="margin-bottom:6px"><h3>빠른 편집</h3><button class="btn ghost" id="qeClose">✖</button></div>
       <div class="grid g2" style="margin-bottom:8px">
         <div><label>루틴 이름</label><input id="qeName" type="text" placeholder="워크아웃 이름"/></div>
-        <div class="controls" style="align-self:end;justify-self:end"><button class="btn" id="qeAdd">➕ 운동 추가</button></div>
+        <div class="row" style="align-self:end;justify-self:end"><button class="btn" id="qeAdd">➕ 운동 추가</button><button class="btn" id="qeSave">💾 템플릿으로 저장</button></div>
       </div>
       <div style="overflow:auto">
         <table class="qe-table" id="qeTable">
@@ -204,7 +170,7 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="controls" style="justify-content:flex-end;margin-top:10px">
+      <div class="row" style="justify-content:flex-end;margin-top:10px">
         <button class="btn" id="qeApply">적용</button>
         <button class="btn primary" id="qeApplyStart">▶ 적용하고 시작</button>
       </div>
@@ -213,33 +179,47 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <style>
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:30}
+    .modal.show{display:flex} .sheet{width:min(980px,95vw);max-height:90vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .qe-table th,.qe-table td{white-space:nowrap} .qe-table input[type=number]{width:90px} .qe-table input[type=text]{min-width:160px}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f1f12;border:1px solid #1e3a26;color:#bff3cc;padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s}
+    .toast.show{opacity:1}
+  </style>
+
   <script>
-  // ===== util
   const $=(s,e=document)=>e.querySelector(s); const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
   const pad2=n=>String(n).padStart(2,'0'); const fmtClock=s=>`${pad2(Math.floor(s/60))}:${pad2(Math.floor(s%60))}`;
   function toast(msg,ok=true){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.style.background= ok? '#0f1f12':'#2a1212'; t.style.borderColor= ok? '#1e3a26':'#4b1e1e'; t.style.color= ok? '#bff3cc':'#f6c1c1'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
 
-  // ===== audio (persistent, louder)
+  // Tabs (mutually exclusive)
+  function showSection(id){ $$('main > section').forEach(s=> s.hidden=true); const el=document.getElementById(id); if(el) el.hidden=false; $$('.nav button').forEach(b=> b.removeAttribute('aria-current')); const btn=document.querySelector('.nav button[data-goto="'+id+'"]'); if(btn) btn.setAttribute('aria-current','page'); }
+  $$('.nav button[data-goto]').forEach(b=> b.addEventListener('click',()=> showSection(b.dataset.goto))); showSection('workout');
+
+  // Theme toggle
+  (function(){ const key='fc_theme'; const saved=localStorage.getItem(key)||'light'; document.documentElement.setAttribute('data-theme',saved); const btn=$('#themeToggle'); const label=t=> t==='dark'? '☾ 야간':'☀︎ 에너지'; btn.textContent=label(saved); btn.addEventListener('click',()=>{ const cur=document.documentElement.getAttribute('data-theme'); const next=cur==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',next); localStorage.setItem(key,next); btn.textContent=label(next); }); })();
+
+  // Focus mode (hide non-player cards)
+  (function(){ const btn=$('#focusToggle'); if(!btn) return; const setLabel=on=> btn.textContent= on? '👁️ 포커스 해제':'👁️ 포커스'; setLabel(false); btn.addEventListener('click',()=>{ const on=!document.body.classList.contains('focus-mode'); document.body.classList.toggle('focus-mode',on); setLabel(on); }); })();
+  function markPlayerState(kind){ const el=document.querySelector('.player'); if(!el) return; el.classList.toggle('resting',kind==='rest'); el.classList.toggle('warning',kind==='warn'); if(!kind){ el.classList.remove('resting','warning'); } }
+
+  // Audio (crescendo, louder)
   let AC=null, MASTER=null; function ensureAC(){ if(AC) return AC; const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; AC=new C(); MASTER=AC.createGain(); MASTER.gain.value=0.9; MASTER.connect(AC.destination); return AC; }
   function beep(ms=180,freq=800,gain=0.35){ try{ const ac=ensureAC(); if(!ac) return; const o=ac.createOscillator(); const g=ac.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(MASTER); const now=ac.currentTime; g.gain.setValueAtTime(gain, now); g.gain.exponentialRampToValueAtTime(0.0001, now+ms/1000); o.start(now); o.stop(now+ms/1000+0.02);}catch(e){} }
-  function crescendo(kind='end'){ const Fs = kind==='start'? [900,1100,1300] : [700,900,1100]; const Gs=[0.32,0.42,0.52]; [0,1,2].forEach(i=> setTimeout(()=> beep(170, Fs[i], Gs[i]), i*1000)); }
+  function crescendo(kind='end'){ const Fs= kind==='start'? [900,1100,1300] : [700,900,1100]; const Gs=[0.32,0.42,0.52]; [0,1,2].forEach(i=> setTimeout(()=> beep(170, Fs[i], Gs[i]), i*1000)); }
 
-  // ===== speech
+  // Speech
   const voice={enabled:true,countCall:true,voiceURI:null,warnSec:3};
   function speak(text){ if(!voice.enabled) return; try{ const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=1; u.pitch=1; const vs=speechSynthesis.getVoices(); if(voice.voiceURI){ const v=vs.find(v=>v.voiceURI===voice.voiceURI); if(v) u.voice=v; } else { const ko=vs.find(v=>v.lang&&v.lang.startsWith('ko')); if(ko) u.voice=ko; } speechSynthesis.speak(u);}catch(e){} }
   function cue(t){ speak(t); beep(); }
 
-  // ===== model (robust storage)
+  // Storage
   function safeGet(k,fb){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):fb; }catch(e){ return fb; } }
   function safeSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ console.warn('localStorage 저장 실패',e); toast('저장 실패: 저장소 권한 확인',false); return false; } }
-  let currentWorkout=null; let templates=safeGet('fc_templates',{}); let historyData=safeGet('fc_history',[]);
+  let currentWorkout=null; let templates=safeGet('fc_templates',{});
   function saveTemplates(){ if(safeSet('fc_templates',templates)){ renderTemplateShelf(); refreshCustomPick(); } }
-  function saveHistory(){ safeSet('fc_history',historyData); }
 
-  // ===== nav
-  $$('.nav button').forEach(b=>b.addEventListener('click',()=>{ const to=b.getAttribute('data-goto'); $$('.nav button').forEach(x=>x.removeAttribute('aria-current')); b.setAttribute('aria-current','page'); $$('main > section').forEach(s=>s.classList.remove('active')); document.getElementById(to).classList.add('active'); }));
-
-  // ===== defaults
+  // Defaults
   const defaultTemplates={
     indoorIntervals:{name:'실내 인터벌 5라운드',exercises:[{name:'버피(강하게)',type:'time',sets:5,secs:60,rest:30,tempo:0,warn:3,note:''}]},
     bodyweight:{name:'맨몸 전신 3세트',exercises:[{name:'푸시업',type:'reps',sets:3,reps:12,rest:30,tempo:2,warn:3,note:''},{name:'스쿼트',type:'reps',sets:3,reps:15,rest:30,tempo:2,warn:3,note:''},{name:'플랭크',type:'time',sets:3,secs:40,rest:30,tempo:0,warn:5,note:''}]},
@@ -248,7 +228,7 @@
     weights5x5:{name:'스쿼트 5×5(90초 휴식)',exercises:[{name:'바벨 스쿼트',type:'reps',sets:5,reps:5,rest:90,tempo:4,warn:3,note:'폼 집중'}]}
   };
 
-  // ===== Quick Start -> Quick Edit modal =====
+  // Quick Edit Modal
   let qeData=null; const qeModal=$('#qeModal'); const qeTBody=$('#qeTable tbody');
   function openQuickEdit(src){ const tpl = typeof src==='string'? (templates[src]||defaultTemplates[src]) : src; if(!tpl){ alert('템플릿이 없습니다.'); return; }
     qeData=JSON.parse(JSON.stringify(tpl)); $('#qeName').value=qeData.name||''; renderQE(); showQE(true); }
@@ -263,7 +243,7 @@
       <td><input type="number" min="0" step="1" data-k="warn" value="${ex.warn||3}"/></td>
       <td><input type="text" data-k="note" value="${ex.note||''}"/></td>
       <td><button class="btn danger" data-del="${i}">삭제</button></td>`; qeTBody.appendChild(tr); }); }
-  qeTBody.addEventListener('input', (e)=>{ if(!qeData) return; const el=e.target; if(!(el instanceof HTMLElement)) return; const td=el.closest('td'); const tr=el.closest('tr'); if(!tr) return; const idx=[...qeTBody.children].indexOf(tr); const k=el.getAttribute('data-k'); if(idx<0||!k) return; const ex=qeData.exercises[idx]; if(k==='qty'){ if(ex.type==='time'){ ex.secs=Math.max(1, +el.value||1); } else { ex.reps=Math.max(1, +el.value||1); } }
+  qeTBody.addEventListener('input', (e)=>{ if(!qeData) return; const el=e.target; if(!(el instanceof HTMLElement)) return; const tr=el.closest('tr'); if(!tr) return; const idx=[...qeTBody.children].indexOf(tr); const k=el.getAttribute('data-k'); if(idx<0||!k) return; const ex=qeData.exercises[idx]; if(k==='qty'){ if(ex.type==='time'){ ex.secs=Math.max(1, +el.value||1); } else { ex.reps=Math.max(1, +el.value||1); } }
     else if(k==='type'){ const v=el.value; ex.type=v; if(v==='time'){ ex.secs=ex.secs||30; } else { ex.reps=ex.reps||10; } renderQE(); }
     else { ex[k] = (el.type==='number')? +el.value : el.value; }
   });
@@ -272,57 +252,51 @@
   $('#qeClose').addEventListener('click',()=> showQE(false));
   qeModal.addEventListener('click',(e)=>{ if(e.target===qeModal) showQE(false); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && qeModal.classList.contains('show')) showQE(false); });
-  function applyQE(startNow=false){ if(!qeData) return; const name=$('#qeName').value.trim() || qeData.name || '사용자 워크아웃'; const exs=qeData.exercises.filter(x=>x&&x.name&&x.sets>0).map(x=>({ name:x.name.trim(), type:x.type==='time'?'time':'reps', sets:Math.max(1, +x.sets||1), reps:x.type==='reps'? Math.max(1, +x.reps||+x.qty||10):undefined, secs:x.type==='time'? Math.max(1, +x.secs||+x.qty||30):undefined, rest:Math.max(0, +x.rest||0), tempo:Math.max(0, +x.tempo||0), warn:Math.max(0, +x.warn||0), note:(x.note||'').trim() })); if(exs.length===0){ alert('운동 항목이 없습니다.'); return; }
-    currentWorkout={name,exercises:exs}; refreshSummary(); showQE(false); toast('워크아웃 적용 완료'); cue('워크아웃이 준비되었습니다.'); if(startNow){ $$('[data-goto="workout"]').forEach(b=>b.click()); try{ ensureAC(); speak(`운동을 시작합니다. ${name}`); }catch(_){ } startSession(); } }
+  function fromQE(){ if(!qeData) return null; const name=$('#qeName').value.trim() || qeData.name || '사용자 워크아웃'; const exs=qeData.exercises.filter(x=>x&&x.name&&x.sets>0).map(x=>({ name:x.name.trim(), type:x.type==='time'?'time':'reps', sets:Math.max(1, +x.sets||1), reps:x.type==='reps'? Math.max(1, +x.reps||+x.qty||10):undefined, secs:x.type==='time'? Math.max(1, +x.secs||+x.qty||30):undefined, rest:Math.max(0, +x.rest||0), tempo:Math.max(0, +x.tempo||0), warn:Math.max(0, +x.warn||0), note:(x.note||'').trim() })); if(exs.length===0){ alert('운동 항목이 없습니다.'); return null; } return {name,exercises:exs}; }
+  function applyQE(startNow=false){ const w=fromQE(); if(!w) return; currentWorkout=w; refreshSummary(); showQE(false); toast('워크아웃 적용 완료'); cue('워크아웃이 준비되었습니다.'); if(startNow){ showSection('workout'); try{ ensureAC(); speak(`운동을 시작합니다. ${w.name}`); }catch(_){ } startSession(); } }
   $('#qeApply').addEventListener('click',()=>applyQE(false));
   $('#qeApplyStart').addEventListener('click',()=>applyQE(true));
+  $('#qeSave').addEventListener('click',()=>{ const w=fromQE(); if(!w) return; const key=prompt('저장 키(영문/숫자): 예) myBodyA'); if(!key) return; const exists=!!templates[key]; if(exists && !confirm('덮어쓸까요?')) return; const name=w.name||key; const exs=w.exercises; templates[key]={name,exercises:exs}; saveTemplates(); toast('템플릿 저장 완료: '+key); });
 
-  // wire Quick Start buttons to Quick Edit (restored behavior)
+  // Quick Start wiring
   $$('#workout [data-template]').forEach(b=>b.addEventListener('click',()=> openQuickEdit(b.dataset.template)));
   function refreshCustomPick(){ const sel=$('#customPick'); const cur=sel.value; sel.innerHTML='<option value="">내 템플릿 불러오기…</option>'; Object.keys(templates).sort().forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=(templates[k].name||k)+' ('+k+')'; sel.appendChild(o); }); sel.value=cur||''; }
   $('#customPick').addEventListener('change',e=>{ const k=e.target.value; if(!k) return; openQuickEdit(k); e.target.value=''; });
 
-  // ===== builder
-  const exType=$('#exType'); const repsWrap=$('#repsWrap'); const timeWrap=$('#timeWrap');
-  exType?.addEventListener('change',()=>{ const isTime=exType.value==='time'; repsWrap.style.display=isTime?'none':''; timeWrap.style.display=isTime?'':''; });
-  const exList=[]; function renderExList(){ const box=$('#exList'); box.innerHTML=''; exList.forEach((ex,idx)=>{ const row=document.createElement('div'); row.className='card ex-row'; row.innerHTML=`<div class="between"><div><b>${ex.name}</b> <span class="tag">${ex.type==='time'?`${ex.secs}s×${ex.sets}`:`${ex.reps}회×${ex.sets}`}</span> ${ex.note?`<span class=tiny>${ex.note}</span>`:''}</div><div class=controls><button class="btn ghost" data-up=${idx}>⬆</button><button class="btn ghost" data-down=${idx}>⬇</button><button class="btn danger" data-del=${idx}>삭제</button></div></div><div class=row><div class=pill><small>세트</small> <b>${ex.sets}</b></div>${ex.type==='time'?`<div class=pill><small>시간</small> <b>${ex.secs}s</b></div>`:`<div class=pill><small>반복</small> <b>${ex.reps}회</b></div>`}<div class=pill><small>휴식</small> <b>${ex.rest}s</b></div><div class=pill><small>템포</small> <b>${ex.tempo}s/회</b></div><div class=pill><small>예고</small> <b>${ex.warn}s</b></div></div>`; box.appendChild(row); }); }
-  $('#exList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.del){ exList.splice(+t.dataset.del,1); renderExList(); refreshSummary(); } if(t.dataset.up){ const i=+t.dataset.up; if(i>0){ [exList[i-1],exList[i]]=[exList[i],exList[i-1]]; renderExList(); } } if(t.dataset.down){ const i=+t.dataset.down; if(i<exList.length-1){ [exList[i+1],exList[i]]=[exList[i],exList[i+1]]; renderExList(); } } });
-  $('#addExercise')?.addEventListener('click',()=>{ const name=$('#exName').value.trim(); if(!name) return alert('운동명을 입력하세요.'); const type=$('#exType').value; const sets=Math.max(1,+$('#exSets').value||1); const reps=Math.max(1,+$('#exReps').value||10); const secs=Math.max(1,+$('#exSecs').value||30); const rest=Math.max(0,+$('#exRest').value||30); const tempo=Math.max(0,+$('#exTempo').value||0); const warn=Math.max(0,+$('#exWarn').value||3); const note=$('#exNote').value.trim(); exList.push({name,type,sets,reps,secs,rest,tempo,warn,note}); renderExList(); refreshSummary(); $('#exName').value=''; $('#exNote').value=''; });
-  function refreshSummary(){ const w=currentWorkout||{name:$('#wname').value.trim()||'(이름 없음)',exercises:exList}; const sum=w.exercises.map(ex=>ex.type==='time'?`${ex.name} ${ex.secs}s×${ex.sets}`:`${ex.name} ${ex.reps}회×${ex.sets}`).join(' · '); $('#summary').textContent=sum||'-'; }
-  function renderTemplateShelf(){ const box=$('#tplList'); box.innerHTML=''; const keys=Object.keys(templates); if(keys.length===0){ box.innerHTML='<div class="tiny muted">저장된 템플릿이 없습니다.</div>'; return; } keys.sort().forEach(k=>{ const t=templates[k]; const el=document.createElement('div'); el.className='between card'; el.style.padding='10px'; el.innerHTML=`<div><b>${t.name||k}</b> <span class="tag">${k}</span><div class="tiny muted">${(t.exercises||[]).length}개 운동</div></div><div class=controls><button class="btn" data-load="${k}">불러오기</button><button class="btn ghost" data-rename="${k}">이름변경</button><button class="btn danger" data-del="${k}">삭제</button></div>`; box.appendChild(el); }); }
-  $('#tplList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.load){ // 보관함은 기존 동작 유지: 바로 로드
-      const key=t.dataset.load; const tpl=templates[key]; if(!tpl) return; currentWorkout=JSON.parse(JSON.stringify(tpl)); refreshSummary(); $$('[data-goto="workout"]').forEach(b=>b.click()); toast('불러왔습니다'); }
+  // Summary & shelf
+  function refreshSummary(){ const w=currentWorkout; const sum=w? w.exercises.map(ex=>ex.type==='time'?`${ex.name} ${ex.secs}s×${ex.sets}`:`${ex.name} ${ex.reps}회×${ex.sets}`).join(' · ') : '-'; $('#summary').textContent = w? `${w.name} — ${sum}` : '-'; }
+  function renderTemplateShelf(){ const box=$('#tplList'); box.innerHTML=''; const keys=Object.keys(templates); if(keys.length===0){ box.innerHTML='<div class="tiny">저장된 템플릿이 없습니다.</div>'; return; } keys.sort().forEach(k=>{ const t=templates[k]; const el=document.createElement('div'); el.className='between card'; el.style.padding='10px'; el.innerHTML=`<div><b>${t.name||k}</b> <span class="tiny" style="opacity:.7">${k}</span><div class="tiny" style="color:var(--muted)">${(t.exercises||[]).length}개 운동</div></div><div class="row"><button class="btn" data-load="${k}">불러오기</button><button class="btn ghost" data-rename="${k}">이름변경</button><button class="btn danger" data-del="${k}">삭제</button></div>`; box.appendChild(el); }); }
+  $('#tplList')?.addEventListener('click',e=>{ const t=e.target; if(!(t instanceof HTMLElement)) return; if(t.dataset.load){ const key=t.dataset.load; const tpl=templates[key]; if(!tpl) return; currentWorkout=JSON.parse(JSON.stringify(tpl)); refreshSummary(); showSection('workout'); toast('불러왔습니다'); }
     if(t.dataset.del){ if(confirm('삭제할까요? '+t.dataset.del)){ delete templates[t.dataset.del]; saveTemplates(); toast('삭제했습니다.'); } }
     if(t.dataset.rename){ const k=t.dataset.rename; const nw=prompt('새 이름:', templates[k].name||k); if(nw){ templates[k].name=nw; saveTemplates(); toast('이름 변경 완료'); } }
   });
-  $('#saveTemplate')?.addEventListener('click',()=>{ const has=exList.length>0 || (currentWorkout && (currentWorkout.exercises||[]).length>0); if(!has) return alert('저장할 운동이 없습니다.'); const key=prompt('저장 키(영문/숫자): 예) myBodyA'); if(!key) return; const exists=!!templates[key]; if(exists && !confirm('덮어쓸까요?')) return; const name=$('#wname').value.trim()||key; const exs=exList.length?exList:currentWorkout.exercises; templates[key]={name,exercises:JSON.parse(JSON.stringify(exs))}; saveTemplates(); toast('템플릿 저장 완료: '+key); });
-  $('#loadToRun')?.addEventListener('click',()=>{ const name=$('#wname').value.trim()||'사용자 워크아웃'; if(!exList.length) return alert('리스트가 비어 있습니다.'); currentWorkout={name,exercises:JSON.parse(JSON.stringify(exList))}; $$('[data-goto="workout"]').forEach(b=>b.click()); speak('워크아웃이 준비되었습니다. 시작을 누르세요.'); });
-  $('#clearAll')?.addEventListener('click',()=>{ if(confirm('모두 지우기?')){ exList.length=0; renderExList(); refreshSummary(); }});
 
-  // ===== runner (with 3s crescendo)
+  // Runner
   const statusEl=$('#status'); const bar=$('#bar'); const nowEx=$('#now-ex'); const nowSet=$('#now-set'); const nowDetail=$('#now-detail'); const remEl=$('#remaining'); const repBtn=$('#repBtn');
-  const runner={i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,timer:null,tempo:0, startSeqFired:false, endSeqFired:false};
+  const runner={i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,timer:null,tempo:0,startSeqFired:false,endSeqFired:false,gen:0};
   function updateUI(){ if(!currentWorkout){ nowEx.textContent='-'; nowSet.textContent='-'; nowDetail.textContent='-'; remEl.textContent='00:00'; if(bar) bar.style.width='0%'; return; } const ex=currentWorkout.exercises[runner.i]; if(!ex){ nowEx.textContent='완료'; nowSet.textContent='-'; nowDetail.textContent='-'; return; } nowEx.textContent=`${ex.name} ${runner.phase==='rest'?'(휴식)':''}`; nowSet.textContent=`${runner.set} / ${ex.sets}`; nowDetail.textContent=ex.type==='time'?`${ex.secs}s`:`${runner.rep}/${ex.reps}회`; }
-  function startSession(){ if(!currentWorkout){ alert('템플릿을 선택하거나 빌더에서 생성하세요.'); return; } ensureAC(); document.body.focus(); Object.assign(runner,{i:0,set:1,phase:'work',rep:0,repsTarget:0,warnDone:false,paused:false,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='진행 중'; $('#startBtn').disabled=true; $('#pauseBtn').disabled=false; $('#skipBtn').disabled=false; $('#resetBtn').disabled=false; repBtn.disabled=false; speak(`운동을 시작합니다. ${currentWorkout.name}`); stepWork(); }
-  function stepWork(){ const ex=currentWorkout.exercises[runner.i]; if(!ex) return finishSession(); runner.phase='work'; runner.warnDone=false; runner.endSeqFired=false; if(bar) bar.style.width='0%'; if(ex.type==='time'){ runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.secs*1000; $('#countdown-label').textContent='남은 시간'; speak(`${ex.name} ${runner.set}세트 시작`); tick(); } else { runner.rep=0; runner.repsTarget=ex.reps; runner.tempo=ex.tempo||0; $('#countdown-label').textContent='반복'; speak(`${ex.name} ${runner.set}세트 시작`); if(voice.countCall&&runner.tempo>0){ scheduleNextRep(); } else { updateUI(); } } }
-  function scheduleNextRep(){ const ex=currentWorkout.exercises[runner.i]; if(!ex||runner.phase!=='work') return; if(runner.rep>=runner.repsTarget){ return afterWork(); } runner.timer&&clearTimeout(runner.timer); runner.timer=setTimeout(()=>{ runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep===runner.repsTarget-1){ speak('마지막 한 개'); beep(200,600,0.5); } if(runner.rep>=runner.repsTarget){ setTimeout(afterWork,300); } else { scheduleNextRep(); } }, Math.max(10,runner.tempo*1000)); }
-  function tick(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.secs*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.endSeqFired && remain/1000<=3){ runner.endSeqFired=true; speak('곧 종료합니다'); crescendo('end'); }
-    if(remain<=0){ afterWork(); return;} runner.timer=requestAnimationFrame(tick); }
-  function afterWork(){ const ex=currentWorkout.exercises[runner.i]; if(ex.rest>0){ runner.phase='rest'; runner.warnDone=false; runner.startSeqFired=false; speak('휴식 시작'); runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.rest*1000; $('#countdown-label').textContent='휴식 남은 시간'; tickRest(); } else { nextSetOrExercise(); } }
-  function tickRest(){ if(runner.paused) return; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.rest*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.startSeqFired && remain/1000<=3){ runner.startSeqFired=true; speak('준비'); crescendo('start'); }
-    if(remain<=0){ nextSetOrExercise(); return;} runner.timer=requestAnimationFrame(tickRest); }
+  function startSession(){ if(!currentWorkout){ alert('템플릿을 선택하거나 빠른편집으로 생성하세요.'); return; } ensureAC(); Object.assign(runner,{i:0,set:1,phase:'work',rep:0,repsTarget:0,warnDone:false,paused:false,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='진행 중'; $('#startBtn').disabled=true; $('#pauseBtn').disabled=false; $('#skipBtn').disabled=false; $('#resetBtn').disabled=false; repBtn.disabled=false; speak(`운동을 시작합니다. ${currentWorkout.name}`); stepWork(); }
+  function stepWork(){ const ex=currentWorkout.exercises[runner.i]; if(!ex) return finishSession(); runner.phase='work'; runner.warnDone=false; runner.endSeqFired=false; markPlayerState(''); if(bar) bar.style.width='0%'; if(ex.type==='time'){ runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.secs*1000; $('#countdown-label').textContent='남은 시간'; speak(`${ex.name} ${runner.set}세트 시작`); tick(); } else { runner.rep=0; runner.repsTarget=ex.reps; runner.tempo=ex.tempo||0; $('#countdown-label').textContent='반복'; speak(`${ex.name} ${runner.set}세트 시작`); if(voice.countCall&&runner.tempo>0){ scheduleNextRep(); } else { updateUI(); } } }
+  function scheduleNextRep(){ const g=runner.gen; const ex=currentWorkout.exercises[runner.i]; if(!ex||runner.phase!=='work') return; if(runner.rep>=runner.repsTarget){ return afterWork(); } runner.timer&&clearTimeout(runner.timer); runner.timer=setTimeout(()=>{ if(runner.gen!==g || runner.phase==='idle') return; runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep===runner.repsTarget-1){ speak('마지막 한 개'); beep(200,600,0.45); } if(runner.rep>=runner.repsTarget){ setTimeout(afterWork,300); } else { scheduleNextRep(); } }, Math.max(10,runner.tempo*1000)); }
+  function tick(){ if(runner.paused) return; const g=runner.gen; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.secs*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.endSeqFired && remain/1000<=3){ runner.endSeqFired=true; speak('곧 종료합니다'); crescendo('end'); markPlayerState('warn'); }
+    if(remain<=0){ afterWork(); return;} runner.timer=requestAnimationFrame(()=>{ if(runner.gen!==g || runner.phase==='idle') return; tick(); }); }
+  function afterWork(){ const ex=currentWorkout.exercises[runner.i]; if(ex.rest>0){ runner.phase='rest'; runner.warnDone=false; markPlayerState('rest'); speak('휴식 시작'); runner.tStart=performance.now(); runner.tEnd=runner.tStart+ex.rest*1000; $('#countdown-label').textContent='휴식 남은 시간'; tickRest(); } else { nextSetOrExercise(); } }
+  function tickRest(){ if(runner.paused) return; const g=runner.gen; const now=performance.now(); const remain=Math.max(0,runner.tEnd-now); remEl.textContent=fmtClock(remain/1000); const ex=currentWorkout.exercises[runner.i]; const total=ex.rest*1000; const prog=1-remain/total; if(bar) bar.style.width=`${Math.max(0,Math.min(1,prog))*100}%`; updateUI(); if(!runner.startSeqFired && remain/1000<=3){ runner.startSeqFired=true; speak('준비'); crescendo('start'); markPlayerState('warn'); }
+    if(remain<=0){ markPlayerState(''); nextSetOrExercise(); return;} runner.timer=requestAnimationFrame(()=>{ if(runner.gen!==g || runner.phase==='idle') return; tickRest(); }); }
   function nextSetOrExercise(){ const ex=currentWorkout.exercises[runner.i]; if(runner.set<ex.sets){ runner.set++; stepWork(); } else { runner.i++; runner.set=1; if(runner.i>=currentWorkout.exercises.length) finishSession(); else stepWork(); } }
   function pauseSession(){ if(runner.paused) return resumeSession(); runner.paused=true; statusEl.textContent='일시정지'; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} }
   function resumeSession(){ runner.paused=false; statusEl.textContent='진행 중'; const ex=currentWorkout.exercises[runner.i]; if(!ex) return; if(runner.phase==='work'){ if(ex.type==='time') tick(); else scheduleNextRep(); } else if(runner.phase==='rest') tickRest(); }
-  function skip(){ if(!currentWorkout) return; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} speak('스킵합니다'); nextSetOrExercise(); }
-  function resetSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} Object.assign(runner,{i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='대기'; $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; $('#resetBtn').disabled=true; repBtn.disabled=true; updateUI(); if(bar) bar.style.width='0%'; remEl.textContent='00:00'; }
-  function finishSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} statusEl.textContent='완료'; speak('수고하셨습니다. 워크아웃이 완료되었습니다.'); $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; repBtn.disabled=true; const end=new Date(); historyData.unshift({ts:end.toISOString(),name:currentWorkout?.name||'-',summary:$('#summary').textContent,duration:calcDurationEstimate(currentWorkout)}); historyData=historyData.slice(0,200); saveHistory(); renderHistory(); }
-  function calcDurationEstimate(w){ if(!w) return '—'; let s=0; w.exercises.forEach(ex=>{ if(ex.type==='time') s+=(ex.secs+(ex.rest||0))*ex.sets; else s+= (ex.tempo>0?ex.reps*ex.tempo:2*ex.reps)*ex.sets + (ex.rest||0)*ex.sets; }); return fmtClock(s); }
+  function skip(){ if(!currentWorkout) return; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} speak('스킵합니다'); markPlayerState(''); nextSetOrExercise(); }
+  function resetSession(){ runner.gen++; if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} Object.assign(runner,{i:0,set:1,phase:'idle',rep:0,repsTarget:0,tStart:0,tEnd:0,warnDone:false,paused:false,timer:null,tempo:0,startSeqFired:false,endSeqFired:false}); statusEl.textContent='대기'; $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; $('#resetBtn').disabled=true; repBtn.disabled=true; updateUI(); if(bar) bar.style.width='0%'; remEl.textContent='00:00'; try{ speechSynthesis.cancel(); }catch(e){} markPlayerState(''); }
+  function finishSession(){ if(runner.timer){ cancelAnimationFrame(runner.timer); clearTimeout(runner.timer);} statusEl.textContent='완료'; speak('수고하셨습니다. 워크아웃이 완료되었습니다.'); $('#pauseBtn').disabled=true; $('#skipBtn').disabled=true; repBtn.disabled=true; markPlayerState(''); }
 
-  // buttons
+  // Buttons
   $('#startBtn').addEventListener('click',startSession); $('#pauseBtn').addEventListener('click',pauseSession); $('#skipBtn').addEventListener('click',skip); $('#resetBtn').addEventListener('click',resetSession);
-  document.addEventListener('keydown',e=>{ if(e.code==='Space'&&!repBtn.disabled){ e.preventDefault(); repBtn.click(); } });
-  $('#repBtn').addEventListener('click',()=>{ const ex=currentWorkout?.exercises[runner.i]; if(!ex||ex.type!=='reps') return; if(runner.phase!=='work') return; runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep>=ex.reps){ speak('곧 종료합니다'); beep(200,900,0.5); setTimeout(afterWork,300); } });
+  $('#quickStart').addEventListener('click',startSession);
+  $('#clearCurrent').addEventListener('click',()=>{ currentWorkout=null; refreshSummary(); resetSession(); });
+  $('#editCurrent').addEventListener('click',()=>{ if(!currentWorkout) { openQuickEdit({name:'새 루틴',exercises:[]}); } else { openQuickEdit(currentWorkout); } });
+  document.addEventListener('keydown',(e)=>{ if(e.code==='Space'&&!repBtn.disabled){ e.preventDefault(); repBtn.click(); } });
+  $('#repBtn').addEventListener('click',()=>{ const ex=currentWorkout?.exercises[runner.i]; if(!ex||ex.type!=='reps') return; if(runner.phase!=='work') return; runner.rep++; updateUI(); if(voice.countCall) speak(String(runner.rep)); else beep(); if(runner.rep>=ex.reps){ speak('곧 종료합니다'); beep(180,900,0.5); setTimeout(afterWork,300); } });
 
   // GPS
   const gps={id:null,pts:[],dist:0}; function hav(a,b){ const toR=d=>d*Math.PI/180; const R=6371000; const dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon); const lat1=toR(a.lat), lat2=toR(b.lat); const h=Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(Math.abs(dLon)/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
@@ -330,23 +304,36 @@
   $('#gpsStart').addEventListener('click',()=>{ if(!navigator.geolocation) return alert('이 기기는 위치 서비스를 지원하지 않습니다.'); if(gps.id) return; gps.pts=[]; gps.dist=0; $('#gpsPts').textContent='0'; $('#gpsDist').textContent='0.00 km'; gps.id=navigator.geolocation.watchPosition(gpsUpdate,console.warn,{enableHighAccuracy:true,maximumAge:2000,timeout:10000}); $('#gpsStart').disabled=true; $('#gpsStop').disabled=false; });
   $('#gpsStop').addEventListener('click',()=>{ if(gps.id){ navigator.geolocation.clearWatch(gps.id); gps.id=null; } $('#gpsStart').disabled=false; $('#gpsStop').disabled=true; alert('기록된 좌표 수: '+gps.pts.length+'\n총 거리: '+(gps.dist/1000).toFixed(2)+' km'); });
 
-  // history
-  function renderHistory(){ const tbody=$('#histBody'); tbody.innerHTML=''; historyData.forEach(it=>{ const tr=document.createElement('tr'); const dt=new Date(it.ts); tr.innerHTML=`<td>${dt.toLocaleString()}</td><td>${it.name}</td><td>${it.duration}</td><td class=muted>${it.summary||''}</td>`; tbody.appendChild(tr); }); }
-  renderHistory();
-  $('#exportData').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({templates,historyData},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fitness-coach-data.json'; a.click(); URL.revokeObjectURL(a.href); });
-  $('#importData').addEventListener('click',()=> $('#importFile').click());
-  $('#importFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const fr=new FileReader(); fr.onload=()=>{ try{ const obj=JSON.parse(fr.result); if(obj.templates) templates=obj.templates; if(obj.historyData) historyData=obj.historyData; saveTemplates(); saveHistory(); renderHistory(); toast('데이터 불러왔습니다.'); }catch(err){ alert('JSON 파싱 실패'); } }; fr.readAsText(f); });
-
-  // alerts tab wiring
-  function populateVoices(){ const sel=$('#setVoice'); if(!sel) return; sel.innerHTML=''; const vs=speechSynthesis.getVoices(); const opts=vs.filter(v=>v.lang&&v.lang.startsWith('ko')); if(opts.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='(기본)'; sel.appendChild(o); return; } opts.forEach(v=>{ const o=document.createElement('option'); o.value=v.voiceURI; o.textContent=v.name+' · '+v.lang; sel.appendChild(o); }); if(voice.voiceURI){ sel.value=voice.voiceURI; } }
-  speechSynthesis.onvoiceschanged=populateVoices; populateVoices();
+  // Voices & settings
+  speechSynthesis.onvoiceschanged=()=>{ const sel=$('#setVoice'); if(!sel) return; sel.innerHTML=''; const vs=speechSynthesis.getVoices(); const opts=vs.filter(v=>v.lang&&v.lang.startsWith('ko')); if(opts.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='(기본)'; sel.appendChild(o); return; } opts.forEach(v=>{ const o=document.createElement('option'); o.value=v.voiceURI; o.textContent=v.name+' · '+v.lang; sel.appendChild(o); }); if(voice.voiceURI){ sel.value=voice.voiceURI; } };
   $('#setTTS')?.addEventListener('change',e=>{ voice.enabled=e.target.value==='on'; });
   $('#setVoice')?.addEventListener('change',e=>{ voice.voiceURI=e.target.value||null; });
   $('#setCountCall')?.addEventListener('change',e=>{ voice.countCall=e.target.value==='on'; });
   $('#setWarn')?.addEventListener('change',e=>{ voice.warnSec=Math.max(0,+e.target.value||3); });
 
-  // init
-  renderTemplateShelf(); refreshCustomPick(); updateUI(); refreshSummary();
+  // PWA: SW register + install prompt
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(console.warn);
+    });
+  }
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('installBtn');
+    if (btn) btn.style.display = 'inline-flex';
+  });
+  document.getElementById('installBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('installBtn');
+    if (!deferredPrompt) return;
+    btn.disabled = true;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => console.log('PWA installed'));
   </script>
 </body>
 </html>

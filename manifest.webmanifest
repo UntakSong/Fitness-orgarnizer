@@ -1,15 +1,18 @@
 {
-  "name": "피트니스 코치",
-  "short_name": "피트니스 코치",
-  "description": "실내/맨몸/달리기/걷기/웨이트용 코치 · 오프라인/PWA 지원",
-  "start_url": ".",
-  "scope": ".",
+  "id": "/",
+  "name": "Fitness Coach",
+  "short_name": "FitCoach",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0b0f14",
-  "theme_color": "#0b0f14",
+  "theme_color": "#00C167",
+  "description": "단일 HTML 운동 코치. 빠른편집, 음성, 크레센도, GPS, 템플릿.",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "lang": "ko-KR",
+  "dir": "ltr"
 }
